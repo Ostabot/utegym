@@ -1,21 +1,14 @@
-
-import { Tabs } from 'expo-router';
-import { useEffect } from 'react';
+import { Stack } from 'expo-router';
+import { AppProvider } from '@/providers/app-provider';
 import { AuthBootstrapper } from '@/lib/auth-bootstrapper';
 
 export default function RootLayout() {
-  // Handle magic link callbacks & native deep links
-  useEffect(() => { /* nothing needed here: AuthBootstrapper mounts globally */ }, []);
-
   return (
-    <>
+    <AppProvider>
       <AuthBootstrapper />
-      <Tabs screenOptions={{ headerShown: false }}>
-        <Tabs.Screen name="index" options={{ title: 'Hem' }} />
-        <Tabs.Screen name="train" options={{ title: 'Träna' }} />
-        <Tabs.Screen name="feed" options={{ title: 'Flöde' }} />
-        <Tabs.Screen name="profile" options={{ title: 'Profil' }} />
-      </Tabs>
-    </>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </AppProvider>
   );
 }

@@ -3,14 +3,37 @@ import { useEffect } from 'react';
 import * as Linking from 'expo-linking';
 import { supabase } from './supabase';
 
+async function handleUrl(url: string | null) {
+  if (!url) return;
+  try {
+    const parsed = new URL(url);
+    const queryParams = parsed.search;
+    if (queryParams.includes('code=')) {
+      await supabase.auth.exchangeCodeForSession({ queryParams, storeSession: true });
+    }
+  } catch (error) {
+    console.warn('Failed to handle auth callback', error);
+  }
+}
+
 export function AuthBootstrapper() {
   useEffect(() => {
-    // Handle mail magic-link callback in native
-    const sub = Linking.addEventListener('url', async ({ url }) => {
-      const { search } = new URL(url);
-      await supabase.auth.exchangeCodeForSession({ queryParams: search, storeSession: true });
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      handleUrl(url).catch(() => undefined);
     });
-    return () => { sub.remove(); };
+
+    Linking.getInitialURL().then((initialUrl) => {
+      handleUrl(initialUrl).catch(() => undefined);
+    });
+
+    if (typeof window !== 'undefined') {
+      handleUrl(window.location.href).catch(() => undefined);
+    }
+
+    return () => {
+      sub.remove();
+    };
   }, []);
+
   return null;
 }
