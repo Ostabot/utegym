@@ -1,64 +1,36 @@
-
+// src/lib/supabase.ts
 import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
 
-const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl as string;
-const supabaseAnon = Constants.expoConfig?.extra?.supabaseAnon as string;
+const envUrl = process.env.EXPO_PUBLIC_SUPABASE_URL as string | undefined;
+const envAnon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string | undefined;
+const extra = (Constants.expoConfig?.extra as any) ?? (Constants as any)?.manifestExtra ?? {};
 
-async function secureGet(key: string) {
-  if (Platform.OS === 'web') {
-    return AsyncStorage.getItem(key);
-  }
-  try {
-    const value = await SecureStore.getItemAsync(key);
-    return value ?? (await AsyncStorage.getItem(key));
-  } catch (error) {
-    console.warn('SecureStore getItem failed, falling back to AsyncStorage', error);
-    return AsyncStorage.getItem(key);
-  }
+const supabaseUrl = envUrl ?? (extra?.supabaseUrl as string | undefined);
+const supabaseAnon = envAnon ?? (extra?.supabaseAnonKey as string | undefined);
+
+if (!supabaseUrl || !supabaseAnon) {
+  console.warn('Supabase env saknas. Kolla .env och app.config.ts', {
+    hasEnvUrl: !!envUrl,
+    hasEnvAnon: !!envAnon,
+    extra,
+  });
 }
 
-async function secureSet(key: string, value: string) {
-  if (Platform.OS === 'web') {
-    await AsyncStorage.setItem(key, value);
-    return;
-  }
-  try {
-    await SecureStore.setItemAsync(key, value);
-  } catch (error) {
-    console.warn('SecureStore setItem failed, falling back to AsyncStorage', error);
-  }
-  await AsyncStorage.setItem(key, value);
-}
-
-async function secureRemove(key: string) {
-  if (Platform.OS === 'web') {
-    await AsyncStorage.removeItem(key);
-    return;
-  }
-  try {
-    await SecureStore.deleteItemAsync(key);
-  } catch (error) {
-    console.warn('SecureStore removeItem failed', error);
-  }
-  await AsyncStorage.removeItem(key);
-}
-
+// Secure storage
 const storage = {
-  getItem: secureGet,
-  setItem: secureSet,
-  removeItem: secureRemove,
+  getItem: async (k: string) => (await SecureStore.getItemAsync(k)) ?? AsyncStorage.getItem(k),
+  setItem: async (k: string, v: string) => {
+    try { await SecureStore.setItemAsync(k, v); } catch { await AsyncStorage.setItem(k, v); }
+  },
+  removeItem: async (k: string) => {
+    try { await SecureStore.deleteItemAsync(k); } catch { await AsyncStorage.removeItem(k); }
+  },
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnon, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    storage,
-    detectSessionInUrl: false,
-  },
+export const supabase = createClient(supabaseUrl ?? '', supabaseAnon ?? '', {
+  auth: { autoRefreshToken: true, persistSession: true, storage, detectSessionInUrl: false },
 });

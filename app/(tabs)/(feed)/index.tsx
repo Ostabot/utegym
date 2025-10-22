@@ -6,7 +6,8 @@ import { sv } from 'date-fns/locale';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { useGyms } from '@/hooks/useGyms';
 
-export default function FeedScreen() {
+//tidigare FeedScreen
+export default function Feed() {
   const [filters, setFilters] = useState<{ gymId?: string; startDate?: string; endDate?: string }>({});
   const { data: workouts, isLoading } = useWorkouts(filters);
   const { data: gyms } = useGyms({});

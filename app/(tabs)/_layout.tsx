@@ -1,3 +1,5 @@
+console.log('Tabs layout mounted')
+
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemePreference } from '@/contexts/theme-context';

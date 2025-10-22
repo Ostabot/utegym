@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Button } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import Toast from 'react-native-toast-message';
@@ -17,7 +17,8 @@ const aliasSchema = z.object({ alias: z.string().min(2).max(30) });
 type EmailForm = z.infer<typeof emailSchema>;
 type AliasForm = z.infer<typeof aliasSchema>;
 
-export default function ProfileScreen() {
+//tidigare ProfileScreen
+export default function Profile() {
   const router = useRouter();
   const { user } = useSession();
   const { preference, setPreference } = useThemePreference();

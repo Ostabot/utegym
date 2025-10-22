@@ -1,0 +1,16 @@
+** BUILD FAILED **
+
+
+The following build commands failed:
+	SwiftCompile normal arm64 Compiling\ AnimatableElement.swift,\ Array+asExpressions.swift,\ CLLocationCoordinate2D+toArray.swift,\ CLLocationCoordinate2D+validate.swift,\ CoordinateBounds+toArray.swift,\ CustomHttpHeaders.swift,\ DefaultStringInterpolation+optional.swift /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/ShapeAnimators/AnimatableElement.swift /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/Extensions/Array+asExpressions.swift /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/Extensions/CLLocationCoordinate2D+toArray.swift /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/Extensions/CLLocationCoordinate2D+validate.swift /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/Extensions/CoordinateBounds+toArray.swift /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/CustomHttpHeaders.swift /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/Extensions/DefaultStringInterpolation+optional.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/CustomHttpHeaders.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/RNMBXFillExtrusionLayerViewManager.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/RNMBXFillLayer.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/RNMBXFillLayerViewManager.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/RNMBXHeatmapLayer.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/RNMBXHeatmapLayerViewManager.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/RNMBXImage.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/RNMBXImageManager.swift (in target 'rnmapbox-maps' from project 'Pods')
+	SwiftCompile normal arm64 /Users/tobiasthornblad/utegym/node_modules/@rnmapbox/maps/ios/RNMBX/RNMBXAtmosphere.swift (in target 'rnmapbox-maps' from project 'Pods')
+	Building workspace UtegymiSverige with scheme UtegymiSverige and configuration Debug
+(11 failures)

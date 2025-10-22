@@ -14,7 +14,8 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export default function TrainEquipmentScreen() {
+//tidigare TrainEquipmentScreen
+export default function Equipment() {
   const router = useRouter();
   const { data } = useEquipment();
   const { equipmentKeys, bodyweightOnly, setEquipment } = useWorkoutWizard();

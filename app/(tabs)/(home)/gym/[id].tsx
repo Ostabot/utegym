@@ -10,7 +10,8 @@ import { pickAndUploadGymPhoto } from '@/lib/photos';
 import { useSession } from '@/contexts/session-context';
 import { supabase } from '@/lib/supabase';
 
-export default function GymDetailsScreen() {
+//tidigare GymDetailsScreen
+export default function Gym() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { data, isLoading, refetch, isRefetching } = useGymDetails(id ?? null);

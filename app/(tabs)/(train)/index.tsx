@@ -5,7 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useGyms, type GymFilter } from '@/hooks/useGyms';
 import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
 
-export default function TrainSelectGymScreen() {
+//tidigare TrainSelectGymScreen
+export default function Train() {
   const [filter, setFilter] = useState<GymFilter>({});
   const router = useRouter();
   const { data } = useGyms(filter);

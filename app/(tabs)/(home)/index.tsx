@@ -7,7 +7,10 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 import { calculateDistance } from '@/utils/geo';
 import type { Tables } from '@/lib/types';
 
-export default function HomeScreen() {
+console.log('Home mounted');
+
+//tidigare HomeScreen
+export default function Home() {
   const [filter, setFilter] = useState<GymFilter>({});
   const { coords } = useUserLocation();
   const { data, isLoading, refetch, isRefetching } = useGyms(filter);

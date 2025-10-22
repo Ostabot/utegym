@@ -7,7 +7,8 @@ import { buildWizardExercises, toggleExerciseSelection } from '@/utils/workout-p
 import { parseMethodScheme } from '@/utils/methods';
 import type { WizardExercise } from '@/types/workout';
 
-export default function TrainExercisesScreen() {
+//tidigare TrainExercisesScreen
+export default function Exercises() {
   const router = useRouter();
   const { data } = useExercises();
   const { equipmentKeys, bodyweightOnly, method, exercises, setExercises } = useWorkoutWizard();

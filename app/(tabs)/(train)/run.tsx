@@ -9,7 +9,8 @@ import { supabase } from '@/lib/supabase';
 import { addPendingWorkout } from '@/lib/workout-sync';
 import type { WorkoutLogSet, WorkoutRunState } from '@/types/workout';
 
-export default function RunWorkoutScreen() {
+//tidigare RunWorkoutScreen
+export default function Run() {
   const router = useRouter();
   const { run, setRun, loading } = useCurrentRun();
   const { reset } = useWorkoutWizard();

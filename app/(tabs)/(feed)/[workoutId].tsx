@@ -11,7 +11,8 @@ interface WorkoutDetail extends Tables<'workouts'> {
   workout_logs: Tables<'workout_logs'>[];
 }
 
-export default function WorkoutDetailScreen() {
+//tidigare WorkoutDetailScreen
+export default function WorkoutDetail() {
   const { workoutId } = useLocalSearchParams<{ workoutId: string }>();
   const [workout, setWorkout] = useState<WorkoutDetail | null>(null);
   const [loading, setLoading] = useState(true);

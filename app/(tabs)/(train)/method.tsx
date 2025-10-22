@@ -4,7 +4,8 @@ import { useWorkoutMethods } from '@/hooks/useWorkoutMethods';
 import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
 import { parseMethodScheme } from '@/utils/methods';
 
-export default function TrainMethodScreen() {
+//tidigare TrainMethodScreen
+export default function Method() {
   const router = useRouter();
   const { data } = useWorkoutMethods();
   const { method, setMethod } = useWorkoutWizard();

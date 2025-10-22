@@ -1,55 +1,46 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Appearance, ColorSchemeName } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// src/contexts/theme-context.tsx
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+import { useColorScheme } from 'react-native';
 
-const STORAGE_KEY = 'utegym.theme-preference';
+type Preference = 'system' | 'light' | 'dark';
+type Resolved = 'light' | 'dark';
 
-type ThemePreference = 'light' | 'dark' | 'system';
-
-type ThemeContextValue = {
-  preference: ThemePreference;
-  resolved: Exclude<ColorSchemeName, undefined>;
-  setPreference: (value: ThemePreference) => Promise<void>;
+type ThemeCtx = {
+  preference: Preference;
+  resolved: Resolved;
+  setPreference: (p: Preference) => void;
 };
 
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+const ThemeContext = createContext<ThemeCtx | null>(null);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>('system');
-  const [resolved, setResolved] = useState<Exclude<ColorSchemeName, undefined>>(Appearance.getColorScheme() ?? 'light');
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const scheme = useColorScheme(); // 'light' | 'dark' | null
+  const [preference, setPreference] = useState<Preference>('system');
 
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((stored) => {
-        if (stored === 'light' || stored === 'dark' || stored === 'system') {
-          setPreferenceState(stored);
-        }
-      })
-      .catch(() => undefined);
-  }, []);
+  const resolved: Resolved =
+    preference === 'system'
+      ? scheme === 'dark'
+        ? 'dark'
+        : 'light'
+      : preference;
 
-  useEffect(() => {
-    if (preference === 'system') {
-      const listener = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
-        setResolved(colorScheme ?? 'light');
-      };
-      const subscription = Appearance.addChangeListener(listener);
-      setResolved(Appearance.getColorScheme() ?? 'light');
-      return () => subscription.remove();
-    }
+  const value = useMemo(
+    () => ({ preference, resolved, setPreference }),
+    [preference, resolved]
+  );
 
-    setResolved(preference);
-    return undefined;
-  }, [preference]);
-
-  const setPreference = useCallback(async (value: ThemePreference) => {
-    setPreferenceState(value);
-    await AsyncStorage.setItem(STORAGE_KEY, value);
-  }, []);
-
-  const value = useMemo(() => ({ preference, resolved, setPreference }), [preference, resolved, setPreference]);
-
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  // Viktigt: returnera bara Provider -> children (ingen textnod etc.)
+  return (
+    <ThemeContext.Provider value={value}>
+      {children ?? null}
+    </ThemeContext.Provider>
+  );
 }
 
 export function useThemePreference() {
