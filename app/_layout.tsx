@@ -6,8 +6,6 @@ import { Stack } from 'expo-router';
 
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
-import * as Sentry from 'sentry-expo';
-import Constants from 'expo-constants';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -32,16 +30,6 @@ import { ThemeProvider as AppThemeProvider } from '@/ui/ThemeProvider';
 import { useAppTheme } from '@/ui/useAppTheme';
 import { makeToastConfig } from '@/ui/toastConfig';
 
-// ---------- Sentry init ----------
-Sentry.init({
-  dsn: Constants.expoConfig?.extra?.sentryDsn as string | undefined,
-  enableInExpoDevelopment: true,
-  debug: __DEV__,
-  tracesSampleRate: 0.1,
-  enableNative: true,
-  enableInExpoGo: true,
-});
-
 // Krävs för OAuth/magic link i dev client
 WebBrowser.maybeCompleteAuthSession();
 
@@ -49,8 +37,7 @@ WebBrowser.maybeCompleteAuthSession();
 const persister = createAsyncStoragePersister({ storage: AsyncStorage });
 persistQueryClient({ queryClient, persister, maxAge: 86_400_000 }); // 24h
 
-// Vi gör en inner-komponent och wrappar den med Sentry nedanför
-function RootLayoutInner() {
+export default function RootLayout() {
   return (
     <PreferenceThemeProvider>
       <AppThemeProvider>
@@ -266,6 +253,3 @@ const styles = StyleSheet.create({
     gap: 2,
   },
 });
-
-// 👇 Viktigt: exportera Sentry-wrap:ad root
-export default Sentry.Native.wrap(RootLayoutInner);
