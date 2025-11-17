@@ -26,9 +26,7 @@ const config: ExpoConfig = {
     mapboxToken: process.env.EXPO_PUBLIC_MAPBOX_TOKEN,
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
-    ...process.env,
-    sentryDsn: process.env.SENTRY_DSN,
-    appEnv: process.env.APP_ENV ?? 'development',
+    
   },
 
   plugins: [
@@ -39,7 +37,7 @@ const config: ExpoConfig = {
         RNMAPBOX_MAPS_DOWNLOAD_TOKEN: process.env.RNMAPBOX_MAPS_DOWNLOAD_TOKEN,
       },
     ],
-    'sentry-expo',
+  
   ],
   
   experiments: {
