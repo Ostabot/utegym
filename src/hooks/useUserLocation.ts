@@ -1,32 +1,68 @@
+// src/hooks/useUserLocation.ts
 import { useCallback, useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 
-export type Coordinates = { latitude: number; longitude: number };
+export type UserCoords = {
+  latitude: number;
+  longitude: number;
+};
+
+type Status = Location.PermissionStatus | 'unknown';
 
 export function useUserLocation() {
-  const [coords, setCoords] = useState<Coordinates | null>(null);
-  const [permissionStatus, setPermissionStatus] = useState<Location.PermissionStatus | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [coords, setCoords] = useState<UserCoords | null>(null);
+  const [status, setStatus] = useState<Status>('unknown');
+  const [error, setError] = useState<string | null>(null);
+  const [isRequesting, setIsRequesting] = useState(false);
 
-  const request = useCallback(async () => {
-    setLoading(true);
+  const requestLocation = useCallback(async (): Promise<UserCoords | null> => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      setPermissionStatus(status);
-      if (status !== Location.PermissionStatus.GRANTED) {
-        setCoords(null);
-        return;
+      setIsRequesting(true);
+      setError(null);
+
+      // 1) Be om foreground-permission
+      const { status: permStatus } =
+        await Location.requestForegroundPermissionsAsync();
+
+      setStatus(permStatus);
+
+      if (permStatus !== Location.PermissionStatus.GRANTED) {
+        setError('permission_denied');
+        return null;
       }
-      const loc = await Location.getCurrentPositionAsync({});
-      setCoords({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+
+      // 2) Hämta aktuell position
+      const pos = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      const c: UserCoords = {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+      };
+
+      setCoords(c);
+      return c;
+    } catch (e: any) {
+      console.warn('[useUserLocation] requestLocation error', e);
+      setError(String(e?.message ?? e));
+      return null;
     } finally {
-      setLoading(false);
+      setIsRequesting(false);
     }
   }, []);
 
+  // Valfritt: auto-försök vid första mount (kan kommenteras bort om du vill)
   useEffect(() => {
-    request().catch(() => undefined);
-  }, [request]);
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    requestLocation();
+  }, [requestLocation]);
 
-  return { coords, permissionStatus, loading, request };
+  return {
+    coords,
+    status,
+    error,
+    isRequesting,
+    requestLocation,
+  };
 }

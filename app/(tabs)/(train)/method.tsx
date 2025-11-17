@@ -1,99 +1,251 @@
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useWorkoutMethods } from '@/hooks/useWorkoutMethods';
 import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
-import { parseMethodScheme } from '@/utils/methods';
+import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
+import { useAppTheme } from '@/ui/useAppTheme';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
-//tidigare TrainMethodScreen
-export default function Method() {
+const focusOpts = [
+  { key: 'full', icon: 'body-outline' },
+  { key: 'upper', icon: 'arrow-up-outline' },
+  { key: 'lower', icon: 'arrow-down-outline' },
+  { key: 'core', icon: 'flame-outline' },
+  { key: 'cardio', icon: 'fitness-outline' }
+] as const;
+
+const intensityOpts = [
+  { key: 'light', icon: 'battery-half-outline' },
+  { key: 'medium', icon: 'battery-charging-outline' },
+  { key: 'hard', icon: 'battery-full-outline' }
+] as const;
+
+const durationOpts = ['5', '10', '15', '30'] as const;
+
+export default function MethodScreen() {
+  const theme = useAppTheme();
   const router = useRouter();
-  const { data } = useWorkoutMethods();
-  const { method, setMethod } = useWorkoutWizard();
+  const { t } = useTranslation();
+  const { state, setMethod } = useWorkoutWizard();
+
+  const current = state.method ?? { focus: 'full', intensity: 'medium', duration: '5' };
+
+  function updateMethod(partial: Partial<typeof current>) {
+    setMethod({ ...current, ...partial });
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Välj träningsmetod</Text>
-      <FlatList
-        data={data ?? []}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={{ gap: 12, paddingBottom: 120 }}
-        renderItem={({ item }) => {
-          const scheme = parseMethodScheme(item);
+    <ScrollView
+      contentContainerStyle={[styles.container, { backgroundColor: theme.colors.bg }]}
+    >
+      {/* Fokus */}
+      <Text
+        style={[styles.h1, { color: theme.colors.text }]}
+        accessibilityRole="header"
+      >
+        {t('train.method.focusTitle')}
+      </Text>
+
+      <View style={styles.grid}>
+        {focusOpts.map((f) => {
+          const active = current.focus === f.key;
           return (
             <Pressable
-              onPress={() => setMethod(item)}
-              style={[styles.card, method?.key === item.key && styles.cardActive]}
+              key={f.key}
+              accessibilityRole="button"
+              accessibilityLabel={t(`workout.focus.${f.key}`)}
+              accessibilityState={{ selected: active }}
+              onPress={() => updateMethod({ focus: f.key })}
+              android_ripple={{ color: theme.colors.border }}
+              style={({ pressed }) => [
+                styles.card,
+                {
+                  backgroundColor: active
+                    ? theme.colors.primary
+                    : theme.colors.card,
+                  borderColor: active
+                    ? theme.colors.primary
+                    : theme.colors.border,
+                  opacity: pressed ? 0.85 : 1
+                }
+              ]}
             >
-              <Text style={styles.cardTitle}>{item.name_sv ?? item.name}</Text>
-              <Text style={styles.cardSubtitle}>{item.intensity ?? 'Okänd intensitet'}</Text>
-              <Text style={styles.cardMeta}>Set: {scheme.sets}</Text>
-              {scheme.reps ? <Text style={styles.cardMeta}>Reps: {scheme.reps.join(', ')}</Text> : null}
-              {scheme.durationSeconds ? (
-                <Text style={styles.cardMeta}>Tid: {Math.round(scheme.durationSeconds / 60)} min</Text>
-              ) : null}
+              <Ionicons
+                name={f.icon as any}
+                size={28}
+                color={active ? theme.colors.primaryText : theme.colors.text}
+                accessible={false}
+              />
+              <Text
+                style={[
+                  styles.cardLabel,
+                  { color: active ? theme.colors.primaryText : theme.colors.text },
+                  active && { fontWeight: '700' }
+                ]}
+              >
+                {t(`workout.focus.${f.key}`)}
+              </Text>
             </Pressable>
           );
-        }}
-        ListEmptyComponent={<Text style={styles.empty}>Inga metoder tillgängliga just nu.</Text>}
-      />
+        })}
+      </View>
 
-      <Pressable
-        disabled={!method}
-        onPress={() => router.push('/train/exercises')}
-        style={[styles.primaryButton, !method && styles.primaryButtonDisabled]}
+      {/* Intensitet */}
+      <Text
+        style={[styles.h1, { color: theme.colors.text }]}
+        accessibilityRole="header"
       >
-        <Text style={styles.primaryButtonText}>Välj övningar</Text>
+        {t('train.method.intensityTitle')}
+      </Text>
+
+      <View style={styles.grid}>
+        {intensityOpts.map((i) => {
+          const active = current.intensity === i.key;
+          return (
+            <Pressable
+              key={i.key}
+              accessibilityRole="button"
+              accessibilityLabel={t(`workout.intensity.${i.key}`)}
+              accessibilityState={{ selected: active }}
+              onPress={() => updateMethod({ intensity: i.key })}
+              android_ripple={{ color: theme.colors.border }}
+              style={({ pressed }) => [
+                styles.chip,
+                {
+                  backgroundColor: active
+                    ? theme.colors.primary
+                    : theme.colors.card,
+                  borderColor: active
+                    ? theme.colors.primary
+                    : theme.colors.border,
+                  opacity: pressed ? 0.85 : 1
+                }
+              ]}
+            >
+              <Ionicons
+                name={i.icon as any}
+                size={28}
+                color={active ? theme.colors.primaryText : theme.colors.text}
+                style={{ marginRight: 6 }}
+                accessible={false}
+              />
+              <Text
+                style={[
+                  styles.chipText,
+                  { color: active ? theme.colors.primaryText : theme.colors.text },
+                  active && { fontWeight: '700' }
+                ]}
+              >
+                {t(`workout.intensity.${i.key}`)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* Tid */}
+      <Text
+        style={[styles.h1, { color: theme.colors.text }]}
+        accessibilityRole="header"
+      >
+        {t('train.method.timeTitle')}
+      </Text>
+
+      <View style={styles.grid}>
+        {durationOpts.map((d) => {
+          const active = current.duration === d;
+          return (
+            <Pressable
+              key={d}
+              accessibilityRole="button"
+              accessibilityLabel={`${d} ${t('common.min')}`}
+              accessibilityState={{ selected: active }}
+              onPress={() => updateMethod({ duration: d })}
+              android_ripple={{ color: theme.colors.border }}
+              style={({ pressed }) => [
+                styles.chip,
+                {
+                  backgroundColor: active
+                    ? theme.colors.primary
+                    : theme.colors.card,
+                  borderColor: active
+                    ? theme.colors.primary
+                    : theme.colors.border,
+                  opacity: pressed ? 0.85 : 1
+                }
+              ]}
+            >
+              <Ionicons
+                name="time-outline"
+                size={28}
+                color={active ? theme.colors.primaryText : theme.colors.text}
+                style={{ marginRight: 6 }}
+                accessible={false}
+              />
+              <Text
+                style={[
+                  styles.chipText,
+                  { color: active ? theme.colors.primaryText : theme.colors.text },
+                  active && { fontWeight: '700' }
+                ]}
+              >
+                {d} {t('common.min')}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* CTA */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('train.method.continue')}
+        onPress={() => router.push('/(tabs)/(train)/exercises')}
+        android_ripple={{ color: theme.colors.primaryText }}
+        style={({ pressed }) => [
+          styles.cta,
+          {
+            backgroundColor: theme.colors.primary,
+            opacity: pressed ? 0.9 : 1
+          }
+        ]}
+      >
+        <Text style={[styles.ctaText, { color: theme.colors.primaryText }]}>
+          {t('train.method.continue')}
+        </Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    gap: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
+  container: { padding: 16, gap: 16, flexGrow: 1 },
+  h1: { fontSize: 22, fontWeight: '800', marginBottom: 12 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   card: {
-    backgroundColor: '#fff',
+    width: '33%',
+    aspectRatio: 1.25,
     borderRadius: 16,
-    padding: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    gap: 4,
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
   },
-  cardActive: {
-    borderColor: '#0ea5e9',
+  cardLabel: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  cardSubtitle: {
-    color: '#64748b',
-  },
-  cardMeta: {
-    color: '#0f172a',
-  },
-  empty: {
-    textAlign: 'center',
-    color: '#94a3b8',
-  },
-  primaryButton: {
-    backgroundColor: '#0ea5e9',
+  chipText: { fontSize: 15 },
+  cta: {
+    marginTop: 24,
     paddingVertical: 16,
     borderRadius: 14,
-    alignItems: 'center',
+    alignItems: 'center'
   },
-  primaryButtonDisabled: {
-    backgroundColor: '#94a3b8',
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
+  ctaText: { fontWeight: '800', fontSize: 16 }
 });

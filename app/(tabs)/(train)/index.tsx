@@ -1,108 +1,162 @@
-import { useState } from 'react';
-import { View, Text, FlatList, Pressable, TextInput, StyleSheet } from 'react-native';
+// app/(tabs)/(train)/index.tsx
+import { useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  TextInput,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useGyms, type GymFilter } from '@/hooks/useGyms';
 import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
+import { useGyms, type GymFilter } from '@/hooks/useGyms';
+import type { Tables } from '@/lib/types';
+import { useAppTheme } from '@/ui/useAppTheme';
+import { useTranslation } from 'react-i18next';
 
-//tidigare TrainSelectGymScreen
-export default function Train() {
-  const [filter, setFilter] = useState<GymFilter>({});
+type GymRow = Tables<'gym_preview'>;
+
+export default function TrainStart() {
   const router = useRouter();
-  const { data } = useGyms(filter);
-  const { setGym, gym } = useWorkoutWizard();
+  const theme = useAppTheme();
+  const { t } = useTranslation();
+  const { setGym } = useWorkoutWizard();
+
+  const [filter, setFilter] = useState<GymFilter>({});
+  const { data, isLoading, refetch, isRefetching } = useGyms(filter);
+
+  const gyms = useMemo(() => (data ?? []) as GymRow[], [data]);
+
+  function choose(g: GymRow) {
+    setGym({
+      id: g.id,
+      name: g.name,
+      city: g.city,
+      lat: g.lat,
+      lon: g.lon,
+      image_url: g.image_url ?? undefined,
+    });
+    router.push('/(tabs)/(train)/equipment');
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Var vill du träna?</Text>
-      <TextInput
-        placeholder="Sök gym"
-        value={filter.search ?? ''}
-        onChangeText={(value) => setFilter((current) => ({ ...current, search: value }))}
-        style={styles.input}
-      />
+    <View style={[styles.container, { backgroundColor: theme.colors.bg }]}>
+      <Text
+        style={[styles.h1, { color: theme.colors.text }]}
+        accessibilityRole="header"
+      >
+        {t('train.start.title', 'Välj utegym')}
+      </Text>
+
+      <View style={{ gap: 8, marginBottom: 12 }}>
+        <TextInput
+          placeholder={t('train.start.searchPlaceholder', 'Sök gym')}
+          placeholderTextColor={theme.colors.subtext}
+          value={filter.search ?? ''}
+          onChangeText={(txt) => setFilter((f) => ({ ...f, search: txt }))}
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+              color: theme.colors.text,
+            },
+          ]}
+          autoCapitalize="words"
+          accessibilityLabel={t('train.start.searchLabel', 'Sök efter utegym')}
+        />
+
+        <TextInput
+          placeholder={t('train.start.cityPlaceholder', 'Stad')}
+          placeholderTextColor={theme.colors.subtext}
+          value={filter.city ?? ''}
+          onChangeText={(txt) => setFilter((f) => ({ ...f, city: txt }))}
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+              color: theme.colors.text,
+            },
+          ]}
+          autoCapitalize="words"
+          accessibilityLabel={t('train.start.cityLabel', 'Filtrera på stad')}
+        />
+      </View>
+
+      {isLoading ? (
+        <ActivityIndicator
+          color={theme.colors.primary}
+          accessibilityLabel={t('train.start.loading', 'Laddar gym…')}
+        />
+      ) : null}
 
       <FlatList
-        data={data ?? []}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ gap: 12, paddingBottom: 120 }}
+        data={gyms}
+        keyExtractor={(g) => g.id}
+        refreshing={isRefetching}
+        onRefresh={refetch}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ gap: 10, paddingBottom: 40 }}
         renderItem={({ item }) => (
           <Pressable
-            onPress={() => setGym(item)}
-            style={[styles.card, gym?.id === item.id && styles.cardActive]}
+            onPress={() => choose(item)}
+            style={[
+              styles.card,
+              {
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
+                shadowColor: theme.colors.text,
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={`${item.name}, ${item.city ?? t('train.start.unknownCity', 'Okänd stad')}`}
           >
-            <Text style={styles.cardTitle}>{item.name}</Text>
-            <Text style={styles.cardSubtitle}>{item.city ?? 'Okänd stad'}</Text>
-            {gym?.id === item.id ? (
-              <Ionicons name="checkmark-circle" size={20} color="#16a34a" style={{ marginTop: 8 }} />
-            ) : null}
+            <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
+              {item.name}
+            </Text>
+            <Text style={[styles.cardSub, { color: theme.colors.subtext }]}>
+              {item.city ?? t('train.start.unknownCity', 'Okänd stad')}
+            </Text>
           </Pressable>
         )}
-        ListEmptyComponent={<Text style={styles.empty}>Inga gym matchar din sökning.</Text>}
+        ListEmptyComponent={
+          !isLoading ? (
+            <Text
+              style={{ textAlign: 'center', color: theme.colors.subtext }}
+              accessibilityLiveRegion="polite"
+            >
+              {t('train.start.empty', 'Inga gym hittades.')}
+            </Text>
+          ) : null
+        }
       />
-
-      <Pressable
-        disabled={!gym}
-        onPress={() => router.push('/train/equipment')}
-        style={[styles.primaryButton, !gym && styles.primaryButtonDisabled]}
-      >
-        <Text style={styles.primaryButtonText}>Fortsätt</Text>
-      </Pressable>
     </View>
   );
 }
 
+/* Neutrala styles */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    gap: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
+  container: { flex: 1, padding: 16 },
+  h1: { fontSize: 22, fontWeight: '800', marginBottom: 8 },
+
   input: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
+
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
+    padding: 14,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  cardActive: {
-    borderColor: '#0ea5e9',
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  cardSubtitle: {
-    color: '#64748b',
-  },
-  empty: {
-    textAlign: 'center',
-    color: '#94a3b8',
-    marginTop: 32,
-  },
-  primaryButton: {
-    backgroundColor: '#0ea5e9',
-    paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  primaryButtonDisabled: {
-    backgroundColor: '#94a3b8',
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
-  },
+  cardTitle: { fontWeight: '700' },
+  cardSub: {},
 });

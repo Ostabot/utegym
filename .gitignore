@@ -5,3 +5,19 @@
 expo-env.d.ts
 # @end expo-cli
 node_modules
+
+# Env-filer
+.env
+.env.*
+!*.env.sample
+
+# Xcode env
+ios/.xcode.env
+
+# OS & editor
+.DS_Store
+
+# Supabase local state
+supabase/.branches/
+supabase/.temp/
+supabase/.DS_Store

@@ -1,14 +1,21 @@
+// src/types/workout.ts
 import type { Tables } from '@/lib/types';
+import type { Focus, Intensity, DurationKey } from '@/lib/workout';
 
+// — Gym som väljs i guiden (antingen från vy eller tabell)
 export type WizardGym = Tables<'gyms'> | Tables<'gym_preview'> | null;
 
-export type WizardMethod = Tables<'workout_methods'> | null;
+// — DB-rad för metoder (om/när du vill läsa/visa riktiga metoder från DB)
+export type WorkoutMethodRow = Tables<'workout_methods'>;
 
-export type WizardExercise = Tables<'outdoor_exercises_v2'> & {
-  selected: boolean;
-  prescription: ExercisePrescription;
-};
+// — Vad guiden behöver för att generera ett pass
+export type WizardMethod {
+  focus: Focus;            // 'full' | 'upper' | 'lower' | 'core' | 'cardio'
+  intensity: Intensity;    // 'light' | 'medium' | 'hard'
+  duration: DurationKey;   // '5' | '10' | '15' | '30' | '45'
+}
 
+// — Övningar som väljs i guiden (v2-tabellen + recept)
 export type ExercisePrescription = {
   sets: number;
   reps?: number[];
@@ -16,15 +23,21 @@ export type ExercisePrescription = {
   notes?: string;
 };
 
+export type WizardExercise = Tables<'outdoor_exercises_v2'> & {
+  selected: boolean;
+  prescription: ExercisePrescription;
+};
+
+// — Själva planen som guiden skapar
 export type WorkoutPlan = {
   gym: WizardGym;
   equipmentKeys: string[];
   bodyweightOnly: boolean;
-  method: WizardMethod;
   exercises: WizardExercise[];
   scheduledAt: string;
 };
 
+// — Loggning när pass körs
 export type WorkoutLogSet = {
   reps: number | null;
   loadKg: number | null;
