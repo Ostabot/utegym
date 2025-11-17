@@ -1,0 +1,363 @@
+{
+  "feed": {
+    "title": "Feed",
+    "tabs": {
+      "mine": "My workouts",
+      "all": "All workouts",
+      "top": "Top 10"
+    },
+    "card": {
+      "workoutAt": "Workout at {{gym}}",
+      "unknownGym": "Any outdoor gym",
+      "noRating": "No rating",
+      "workout": "Workout",
+      "unrated": "Not rated"
+    }
+  },
+  "exercises": {
+    "add": "Add exercise",
+    "regenerate": "Generate new exercises",
+    "basedOnGym": "Based on equipment at {{gym}}",
+    "searchPlaceholder": "Search exercises...",
+    "empty": "No exercises match the filter",
+    "toast": {
+      "already": "This exercise is already in the list",
+      "added": "Exercise added",
+      "newSuggestion": "New suggestion created",
+      "noMore": "No more exercises match your selection",
+      "noneYet": "No exercises to show yet"
+    }
+  },
+  "errors": {
+    "fetchExercises": "Could not fetch exercises"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "back": "Back",
+    "min": "min",
+    "continue": "Continue",
+    "all": "All"
+  },
+  "workout": {
+    "focus": {
+      "full": "full",
+      "upper": "upper",
+      "lower": "lower",
+      "core": "core",
+      "cardio": "cardio"
+    },
+    "intensity": {
+      "light": "light",
+      "medium": "medium",
+      "hard": "hard"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "alias": {
+      "title": "Alias",
+      "placeholder": "e.g. @strongLisa",
+      "errors": {
+        "length": "Alias must be 2–30 characters",
+        "charset": "Only a–z, 0–9 and _ are allowed",
+        "taken": {
+          "title": "Alias is taken"
+        }
+      }
+    },
+    "intensity": {
+      "title": "Default intensity",
+      "easy": "easy",
+      "medium": "medium",
+      "hard": "hard"
+    },
+    "language": {
+      "title": "Language"
+    },
+    "links": {
+      "attrib": "Attributions & licenses",
+      "oss": "Open source (dependencies)",
+      "map": "Map attributions",
+      "privacy": "Privacy policy",
+      "terms": "Terms of service",
+      "deleteAccount": "Delete my account"
+    },
+    "toasts": {
+      "saved": "Settings saved",
+      "couldNotSave": "Could not save",
+      "deletedOk": "Account deleted",
+      "couldNotDelete": "Could not delete"
+    }
+  },
+  "account": {
+    "delete": {
+      "title": "Delete account",
+      "body": "This will remove your account and all workouts. This cannot be undone."
+    }
+  },
+  "auth": {
+    "loggedIn": "You’re signed in",
+    "loginFailed": "Sign-in failed",
+    "missingCode": "Missing auth code"
+  },
+  "home": {
+    "title": "Outdoor gyms",
+    "noMapboxToken": "Missing Mapbox token. Add EXPO_PUBLIC_MAPBOX_TOKEN to .env and rebuild.",
+    "searchPlaceholder": "Search outdoor gym, city or address",
+    "cta": {
+      "findNearby": "Tap to find outdoor gyms near you",
+      "enableLocation": "Enable location to find nearby"
+    },
+    "locationKnown": "Location: {{lat}}, {{lon}}",
+    "locationUnknown": "Location: unknown",
+    "empty": {
+      "title": "No gyms found",
+      "zoom": "Try zooming the map.",
+      "enableLocation": "Enable location services to find nearby."
+    },
+    "unknownCity": "Unknown city",
+    "meta": {
+      "distanceKmAway": "{{km}} km away",
+      "rating": "Rating {{r}}"
+    }
+  },
+  "gym": {
+    "title": "Gym",
+    "loadError": "Could not load the gym.",
+    "placeholderCaption": "A real photo of this outdoor gym is missing",
+    "unknown": "Any outdoor gym",
+    "commune": "Municipality",
+    "addressMissing": "Address unavailable",
+    "rating": "Rating: {{r}} ★",
+    "createWorkout": "Start workout",
+    "uploadPhoto": "Upload photo",
+    "Beskrivning": "Description",
+    "photos": {
+      "title": "Photos",
+      "empty": "No uploaded photos yet."
+    },
+    "attr": {
+      "google": "Photo: {{authors}} · via Google Maps",
+      "commune": "Photo: {{commune}} municipality · source"
+    },
+    "photo": {
+      "google": "Photo: {{authors}} · via Google Maps",
+      "commune": "Photo: {{commune}} municipality",
+      "userUploaded": "Uploaded by user"
+    },
+    "perms": {
+      "title": "Permission required",
+      "body": "Allow photo library access to upload."
+    },
+    "uploadFailed": {
+      "title": "Upload failed",
+      "fallback": "Please try again."
+    }
+  },
+  "tabs": {
+    "home": "Home",
+    "train": "Train",
+    "feed": "Feed",
+    "profile": "Profile"
+  },
+  "profile": {
+    "title": "Profile",
+    "aliasLabel": "Alias: {{alias}}",
+    "pendingToSync": "Offline workouts pending sync: {{n}}",
+    "actions": {
+      "settings": "Settings",
+      "signOut": "Sign out"
+    },
+    "sections": {
+      "stats": "Stats",
+      "recent": "Recent workouts",
+      "routines": "My routines"
+    },
+    "stats": {
+      "totalWorkouts": "Total workouts",
+      "totalTime": "Total time",
+      "favoriteGym": "Favorite gym",
+      "streak": "Streak",
+      "streakDays": "{{n}} days",
+      "time": {
+        "zero": "0m",
+        "hhmm": "{{h}}h {{m}}m",
+        "mm": "{{m}}m"
+      }
+    },
+    "recent": {
+      "defaultTitle": "Workout",
+      "empty": "No workouts yet.",
+      "when": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "daysAgo": "{{n}} days ago"
+      }
+    },
+    "routines": {
+      "defaultTitle": "My routine"
+    },
+    "login": {
+      "title": "Sign in",
+      "emailPlaceholder": "you@example.com",
+      "sendMagicLink": "Send magic link",
+      "signInWithGoogle": "Sign in with Google",
+      "errors": {
+        "email": "Invalid email"
+      },
+      "magic": {
+        "sent": "Check your inbox!",
+        "failed": {
+          "title": "Could not send magic link",
+          "body": "{{msg}}"
+        }
+      },
+      "google": {
+        "opening": "Opening Google…",
+        "failed": {
+          "title": "Google sign-in failed",
+          "body": "{{msg}}"
+        }
+      }
+    },
+    "avatar": {
+      "updated": "Profile photo updated",
+      "failed": {
+        "title": "Could not upload image",
+        "body": "{{msg}}"
+      }
+    },
+    "errors": {
+      "mustBeLoggedIn": "You need to be signed in",
+      "photosPermission": "Photo library access is required"
+    }
+  },
+  "train": {
+    "titles": {
+      "chooseGym": "Choose your outdoor gym",
+      "chooseEquipment": "Choose your equipment",
+      "chooseMethod": "Choose your training method",
+      "chooseExercises": "Choose your exercises",
+      "plan": "Plan"
+    },
+    "start": {
+      "title": "Choose an outdoor gym",
+      "searchPlaceholder": "Search gym",
+      "cityPlaceholder": "City",
+      "unknownCity": "Unknown city",
+      "empty": "No gyms found."
+    },
+    "plan": {
+      "title": "Workout plan",
+      "cardTitle": "Workout plan",
+      "generateError": "The plan could not be generated. Check your selections.",
+      "gymFallback": "Any outdoor gym",
+      "startCta": "Start workout",
+      "toast": {
+        "loginRequired": "You must be logged in to start a workout",
+        "startFailedTitle": "Couldn't start the workout",
+        "startFailedBody": "Please try again in a moment."
+      }
+    },
+    "method": {
+      "focusTitle": "Focus",
+      "intensityTitle": "Intensity",
+      "timeTitle": "Time",
+      "continue": "Continue"
+    },
+    "share": {
+      "title": "Share your workout",
+      "upload": "Upload your own photo",
+      "challenge": "Challenge a friend (SMS/email/SoMe)",
+      "continue": "Continue",
+      "message": "I just did a workout at the outdoor gym – join me! 🚀",
+      "permsTitle": "Permission required",
+      "permsBody": "Allow access to your photos."
+    }
+  },
+  "complete": {
+    "title": "Nice work!",
+    "congrats": "Nice work!",
+    "ratePrompt": "Rate your workout",
+    "skip": "Skip",
+    "continue": "Continue"
+  },
+  "equipment": {
+    "intro": "Select the equipment you want to use",
+    "sections": {
+      "common": "Common equipment"
+    },
+    "cta": {
+      "continue": "Continue"
+    },
+    "categories": {
+      "accessory": "Accessory",
+      "bank-plattform": "Bench/Platform",
+      "bas": "Base",
+      "grepp-stang": "Grips/Bar",
+      "hinderbana": "Obstacle course",
+      "klatter": "Climbing",
+      "konditionsutrustning": "Cardio equipment",
+      "maskin": "Machine",
+      "maskin-ovrigt": "Machine/Other",
+      "ocr-hinder": "OCR/Obstacle",
+      "rig": "Rig",
+      "rorlighet": "Mobility",
+      "rorlighet-balans": "Mobility/Balance",
+      "space": "Space",
+      "stallning": "Frame/Structure",
+      "station": "Station",
+      "styrka": "Strength",
+      "vikter-och-tillbehor": "Weights & accessories",
+      "yta-och-ovrigt": "Area & misc",
+      "vanlig-utrustning": "Common equipment"
+    }
+  },
+  "run": {
+    "guard": {
+      "noId": "No workout id was provided.",
+      "notFound": "Could not find a workout for this id.",
+      "backToWizard": "Back to workout creator"
+    },
+    "loading": "Loading workout…",
+    "exercise": {
+      "gymFallback": "Outdoor gym",
+      "progress": "Exercise {{index}} of {{total}} · {{gym}}",
+      "setsLabel": "Number of sets",
+      "setLabel": "Set {{n}}",
+      "repsPlaceholder": "reps",
+      "repsSuffix": "reps",
+      "next": "Next",
+      "finish": "Finish workout"
+    },
+    "rating": {
+      "selectRating": "Choose a rating (1–5) before continuing."
+    },
+    "photo": {
+      "perms": "We need access to your photos to upload a picture.",
+      "uploadError": "Could not upload the photo.",
+      "linkError": "Could not save the photo link."
+    },
+    "congrats": {
+      "subtitle": "Workout at {{gym}}",
+      "photoCta": "Upload photo",
+      "shareCta": "Share your workout"
+    },
+    "shareSheet": {
+      "title": "Share your workout",
+      "sms": "SMS",
+      "copy": "Copy link",
+      "email": "Email",
+      "copied": "Link copied!",
+      "smsBody": "Check out my workout at {{gym}}! {{link}}",
+      "emailSubject": "My workout",
+      "emailBody": "Check out my workout at {{gym}}! {{link}}"
+    },
+    "share": {
+      "title": "Share your workout",
+      "message": "Check out my workout at {{gym}}! {{link}}"
+    }
+  }
+}

@@ -1,0 +1,362 @@
+{
+  "feed": {
+    "title": "Flöde",
+    "tabs": {
+      "mine": "Mina pass",
+      "all": "Alla pass",
+      "top": "Topp 10"
+    },
+    "card": {
+      "workoutAt": "Träningspass på {{gym}}",
+      "unknownGym": "Valfritt utegym",
+      "noRating": "Ej betygsatt",
+      "workout": "Träningspass",
+      "unrated": "Ej betygsatt"
+    }
+  },
+  "exercises": {
+    "add": "Lägg till övning",
+    "regenerate": "Generera nya övningar",
+    "basedOnGym": "Baserat på utrustning på {{gym}}",
+    "searchPlaceholder": "Sök övningar...",
+    "empty": "Inga övningar matchar filtret",
+    "toast": {
+      "already": "Övningen finns redan i listan",
+      "added": "Övning tillagd",
+      "newSuggestion": "Nytt förslag skapat",
+      "noMore": "Inga fler övningar matchar ditt urval",
+      "noneYet": "Inga övningar att visa än"
+    }
+  },
+  "errors": {
+    "fetchExercises": "Kunde inte hämta övningar"
+  },
+  "common": {
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "delete": "Radera",
+    "back": "Tillbaka",
+    "min": "min",
+    "continue": "Fortsätt",
+    "all": "Alla"
+  },
+  "workout": {
+    "focus": {
+      "full": "fullkropp",
+      "upper": "överkropp",
+      "lower": "underkropp",
+      "core": "bål",
+      "cardio": "cardio"
+    },
+    "intensity": {
+      "light": "lätt",
+      "medium": "medium",
+      "hard": "tuff"
+    }
+  },
+  "settings": {
+    "title": "Inställningar",
+    "alias": {
+      "title": "Alias",
+      "placeholder": "t.ex. @styrkeLisa",
+      "errors": {
+        "length": "Alias måste vara 2–30 tecken",
+        "charset": "Endast a–z, 0–9 och _ är tillåtet",
+        "taken": {
+          "title": "Alias upptaget"
+        }
+      }
+    },
+    "intensity": {
+      "title": "Standardintensitet",
+      "easy": "lätt",
+      "medium": "medium",
+      "hard": "tuff"
+    },
+    "language": {
+      "title": "Språk"
+    },
+    "links": {
+      "attrib": "Attributioner & licenser",
+      "oss": "Öppen källkod (beroenden)",
+      "map": "Kart-attributioner",
+      "privacy": "Integritetspolicy",
+      "terms": "Användarvillkor",
+      "deleteAccount": "Radera mitt konto"
+    },
+    "toasts": {
+      "saved": "Inställningar sparade",
+      "couldNotSave": "Kunde inte spara",
+      "deletedOk": "Konto raderat",
+      "couldNotDelete": "Kunde inte radera"
+    }
+  },
+  "account": {
+    "delete": {
+      "title": "Radera konto",
+      "body": "Detta tar bort ditt konto och alla träningspass. Åtgärden kan inte ångras."
+    }
+  },
+  "auth": {
+    "loggedIn": "Du är inloggad",
+    "loginFailed": "Kunde inte logga in",
+    "missingCode": "Saknar auth code"
+  },
+  "home": {
+    "title": "Utegym",
+    "noMapboxToken": "Saknar Mapbox-token. Lägg EXPO_PUBLIC_MAPBOX_TOKEN i .env och bygg om.",
+    "searchPlaceholder": "Sök utegym, stad eller adress",
+    "cta": {
+      "findNearby": "Tryck för att hitta utegym i din närhet",
+      "enableLocation": "Slå på platsinformation för att hitta nära"
+    },
+    "locationKnown": "Plats: {{lat}}, {{lon}}",
+    "locationUnknown": "Plats: okänd",
+    "empty": {
+      "title": "Inga gym hittades",
+      "zoom": "Testa att zooma på kartan.",
+      "enableLocation": "Slå på platsinformation för att hitta nära."
+    },
+    "unknownCity": "Okänd stad",
+    "meta": {
+      "distanceKmAway": "{{km}} km bort",
+      "rating": "Betyg {{r}}"
+    }
+  },
+  "gym": {
+    "title": "Gym",
+    "loadError": "Kunde inte ladda gymmet.",
+    "placeholderCaption": "Riktig bild på utegymmet saknas",
+    "unknown": "Valfritt utegym",
+    "commune": "Kommun",
+    "addressMissing": "Adress saknas",
+    "rating": "Betyg: {{r}} ★",
+    "createWorkout": "Skapa träningspass",
+    "uploadPhoto": "Ladda upp bild",
+    "photos": {
+      "title": "Bilder",
+      "empty": "Inga uppladdade bilder ännu."
+    },
+    "attr": {
+      "google": "Foto: {{authors}} · via Google Maps",
+      "commune": "Foto: {{commune}} kommun · källa"
+    },
+    "photo": {
+      "google": "Foto: {{authors}} · via Google Maps",
+      "commune": "Foto: {{commune}} kommun",
+      "userUploaded": "Uppladdad av användare"
+    },
+    "perms": {
+      "title": "Behörighet krävs",
+      "body": "Ge åtkomst till foton för att ladda upp."
+    },
+    "uploadFailed": {
+      "title": "Uppladdning misslyckades",
+      "fallback": "Försök igen."
+    }
+  },
+  "tabs": {
+    "home": "Hem",
+    "train": "Träna",
+    "feed": "Flöde",
+    "profile": "Profil"
+  },
+  "profile": {
+    "title": "Profil",
+    "aliasLabel": "Alias: {{alias}}",
+    "pendingToSync": "Offline-sparade pass att synka: {{n}}",
+    "actions": {
+      "settings": "Inställningar",
+      "signOut": "Logga ut"
+    },
+    "sections": {
+      "stats": "Statistik",
+      "recent": "Senaste träningspass",
+      "routines": "Mina rutiner"
+    },
+    "stats": {
+      "totalWorkouts": "Totala pass",
+      "totalTime": "Total tid",
+      "favoriteGym": "Favoritgym",
+      "streak": "Streak",
+      "streakDays": "{{n}} dagar",
+      "time": {
+        "zero": "0m",
+        "hhmm": "{{h}}h {{m}}m",
+        "mm": "{{m}}m"
+      }
+    },
+    "recent": {
+      "defaultTitle": "Träningspass",
+      "empty": "Inga pass ännu.",
+      "when": {
+        "today": "Idag",
+        "yesterday": "Igår",
+        "daysAgo": "{{n}} dagar sedan"
+      }
+    },
+    "routines": {
+      "defaultTitle": "Min rutin"
+    },
+    "login": {
+      "title": "Logga in",
+      "emailPlaceholder": "din@epost.se",
+      "sendMagicLink": "Skicka magisk länk",
+      "signInWithGoogle": "Logga in med Google",
+      "errors": {
+        "email": "Ogiltig e-post"
+      },
+      "magic": {
+        "sent": "Kolla din inkorg!",
+        "failed": {
+          "title": "Kunde inte skicka magisk länk",
+          "body": "{{msg}}"
+        }
+      },
+      "google": {
+        "opening": "Öppnar Google…",
+        "failed": {
+          "title": "Google-inloggning misslyckades",
+          "body": "{{msg}}"
+        }
+      }
+    },
+    "avatar": {
+      "updated": "Profilbild uppdaterad",
+      "failed": {
+        "title": "Kunde inte ladda upp bild",
+        "body": "{{msg}}"
+      }
+    },
+    "errors": {
+      "mustBeLoggedIn": "Du behöver vara inloggad",
+      "photosPermission": "Behöver tillgång till dina bilder"
+    }
+  },
+  "train": {
+    "titles": {
+      "chooseGym": "Välj ditt utegym",
+      "chooseEquipment": "Välj din utrustning",
+      "chooseMethod": "Välj ditt träningsupplägg",
+      "chooseExercises": "Välj dina övningar",
+      "plan": "Plan"
+    },
+    "start": {
+      "title": "Välj ett utegym",
+      "searchPlaceholder": "Sök gym",
+      "cityPlaceholder": "Stad",
+      "unknownCity": "Okänd stad",
+      "empty": "Inga gym hittades."
+    },
+    "plan": {
+      "title": "Träningsplan",
+      "cardTitle": "Träningsplan",
+      "generateError": "Planen kunde inte genereras. Kontrollera dina val.",
+      "gymFallback": "Valfritt utegym",
+      "startCta": "Starta pass",
+      "toast": {
+        "loginRequired": "Du måste vara inloggad för att starta ett pass",
+        "startFailedTitle": "Kunde inte starta passet",
+        "startFailedBody": "Försök igen om en stund."
+      }
+    },
+    "method": {
+      "focusTitle": "Fokus",
+      "intensityTitle": "Intensitet",
+      "timeTitle": "Tid",
+      "continue": "Fortsätt"
+    },
+    "share": {
+      "title": "Dela ditt pass",
+      "upload": "Ladda upp egen bild",
+      "challenge": "Utmana en vän (SMS/mail/SoMe)",
+      "continue": "Fortsätt",
+      "message": "Jag körde ett träningspass på utegymmet! Häng på 🚀",
+      "permsTitle": "Behörighet krävs",
+      "permsBody": "Ge åtkomst till foton."
+    }
+  },
+  "complete": {
+    "title": "Snyggt jobbat!",
+    "congrats": "Snyggt jobbat!",
+    "ratePrompt": "Betygsätt ditt träningspass",
+    "skip": "Skippa",
+    "continue": "Fortsätt"
+  },
+  "equipment": {
+    "intro": "Välj den utrustning som du vill använda",
+    "sections": {
+      "common": "Vanlig utrustning"
+    },
+    "cta": {
+      "continue": "Fortsätt"
+    },
+    "categories": {
+      "accessory": "Accessoar",
+      "bank-plattform": "Bänk/Plattform",
+      "bas": "Bas",
+      "grepp-stang": "Grepp/stång",
+      "hinderbana": "Hinderbana",
+      "klatter": "Klätter",
+      "konditionsutrustning": "Konditionsutrustning",
+      "maskin": "Maskin",
+      "maskin-ovrigt": "Maskin/Övrigt",
+      "ocr-hinder": "OCR/Hinder",
+      "rig": "Rig",
+      "rorlighet": "Rörlighet",
+      "rorlighet-balans": "Rörlighet/Balans",
+      "space": "Yta",
+      "stallning": "Ställning",
+      "station": "Station",
+      "styrka": "Styrka",
+      "vikter-och-tillbehor": "Vikter och tillbehör",
+      "yta-och-ovrigt": "Yta och övrigt",
+      "vanlig-utrustning": "Vanlig utrustning"
+    }
+  },
+  "run": {
+    "guard": {
+      "noId": "Ingen id-param kom fram.",
+      "notFound": "Kunde inte hitta något pass för detta id.",
+      "backToWizard": "Tillbaka till guiden"
+    },
+    "loading": "Laddar pass…",
+    "exercise": {
+      "gymFallback": "Utegym",
+      "progress": "Övning {{index}} av {{total}} · {{gym}}",
+      "setsLabel": "Antal set",
+      "setLabel": "Set {{n}}",
+      "repsPlaceholder": "reps",
+      "repsSuffix": "reps",
+      "next": "Fortsätt",
+      "finish": "Avsluta pass"
+    },
+    "rating": {
+      "selectRating": "Välj ett betyg (1–5) innan du fortsätter."
+    },
+    "photo": {
+      "perms": "Behöver tillgång till dina bilder för att kunna ladda upp ett foto.",
+      "uploadError": "Kunde inte ladda upp bilden.",
+      "linkError": "Kunde inte spara bildlänken."
+    },
+    "congrats": {
+      "subtitle": "Träningspass på {{gym}}",
+      "photoCta": "Ladda upp foto",
+      "shareCta": "Dela ditt pass"
+    },
+    "shareSheet": {
+      "title": "Dela ditt pass",
+      "sms": "SMS",
+      "copy": "Kopiera länk",
+      "email": "E-post",
+      "copied": "Länk kopierad!",
+      "smsBody": "Kolla mitt träningspass på {{gym}}! {{link}}",
+      "emailSubject": "Mitt träningspass",
+      "emailBody": "Kolla mitt träningspass på {{gym}}! {{link}}"
+    },
+    "share": {
+      "title": "Dela ditt pass",
+      "message": "Kolla mitt träningspass på {{gym}}! {{link}}"
+    }
+  }
+}

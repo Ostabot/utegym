@@ -4,7 +4,7 @@
 
 expo-env.d.ts
 # @end expo-cli
-node_modules
+node_modules/
 
 # Env-filer
 .env
@@ -21,3 +21,39 @@ ios/.xcode.env
 supabase/.branches/
 supabase/.temp/
 supabase/.DS_Store
+
+# --- Lokala backup-filer & data ---
+Backup/
+Backup av tomma mappar/
+Masterlista med utegym/
+Tabeller/
+
+# CSV-exporter m.m. i dessa mappar
+Masterlista med utegym/**/*.csv
+Tabeller/**/*.csv
+
+# Översättnings-playground (Python + venv)
+Translate/
+*.pyc
+*.pyo
+*.pyd
+*.venv/
+venv/
+.envrc
+
+# OS/verktygsfiler
+.DS_Store
+.watchmanconfig.json
+
+# Supabase temp
+supabase/.temp/
+supabase/.branches/
+
+# Expo/React Native cache (om de inte redan ignoreras)
+.expo/
+.expo-shared/
+
+# Blandat som inte bör checkas in
+Graphic elements/
+colors/
+translate_exercises.mjs
