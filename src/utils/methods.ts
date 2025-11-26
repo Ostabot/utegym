@@ -1,5 +1,5 @@
 import type { Tables } from '@/lib/types';
-import type { ExercisePrescription } from '@/types/workout';
+import type { ExercisePrescription } from 'src/types/workout';
 
 type MethodScheme = {
   sets?: number;

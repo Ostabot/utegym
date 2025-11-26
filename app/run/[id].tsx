@@ -28,8 +28,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { supabase } from '@/lib/supabase';
-import { useAppTheme } from '@/ui/useAppTheme';
-import { useSession } from '@/contexts/session-context';
+import { useAppTheme } from 'src/ui/useAppTheme';
+import { useSession } from 'src/contexts/session-context';
 import { useTranslation } from 'react-i18next';
 
 function base64ToUint8Array(base64: string) {

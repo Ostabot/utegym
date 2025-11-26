@@ -3,11 +3,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import Toast from 'react-native-toast-message';
 import type { ReactNode } from 'react';
-import { queryClient } from '@/lib/query-client';
-import { SessionProvider } from '@/contexts/session-context';
-import { ThemeProvider, useThemePreference } from '@/contexts/theme-context';
-import { WorkoutWizardProvider } from '@/contexts/workout-wizard-context';
-import { usePendingWorkoutSync } from '@/hooks/usePendingWorkoutSync';
+import { queryClient } from 'src/lib/query-client';
+import { SessionProvider } from 'src/contexts/session-context';
+import { ThemeProvider, useThemePreference } from 'src/contexts/theme-context';
+import { WorkoutWizardProvider } from 'src/contexts/workout-wizard-context';
+import { usePendingWorkoutSync } from 'src/hooks/usePendingWorkoutSync';
 
 function SyncBoundary() {
   usePendingWorkoutSync();

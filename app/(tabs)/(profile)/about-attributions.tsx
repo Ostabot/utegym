@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Linking, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAppTheme } from '@/ui/useAppTheme';
-import AccessiblePressable from '@/ui/AccessiblePressable';
+import { useAppTheme } from 'src/ui/useAppTheme';
+import AccessiblePressable from 'src/ui/AccessiblePressable';
 
 type Item = {
   name: string;

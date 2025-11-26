@@ -1,6 +1,6 @@
 //app/run/_layout.tsx
 import { Stack } from 'expo-router';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
 
 export default function RunLayout() {

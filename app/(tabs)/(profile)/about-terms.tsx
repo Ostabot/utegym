@@ -1,7 +1,7 @@
 // app/(tabs)/(profile)/about-terms.tsx
 import React, { useState } from 'react';
 import { ScrollView, Text, StyleSheet, View, Pressable } from 'react-native';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 
 export default function AboutTerms() {
   const theme = useAppTheme();

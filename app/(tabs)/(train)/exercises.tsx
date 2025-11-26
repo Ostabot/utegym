@@ -14,10 +14,10 @@ import {
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { supabase } from '@/lib/supabase';
-import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
-import type { Focus, Intensity, DurationKey } from '@/lib/workout';
-import { fetchEquipmentMaster } from '@/lib/equipment-utils';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useWorkoutWizard } from 'src/contexts/workout-wizard-context';
+import type { Focus, Intensity, DurationKey } from 'src/lib/workout';
+import { fetchEquipmentMaster } from 'src/lib/equipment-utils';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 

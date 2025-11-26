@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateDistance } from '@/utils/geo';
+import { calculateDistance } from 'src/utils/geo';
 
 describe('calculateDistance', () => {
   it('returns zero for identical points', () => {

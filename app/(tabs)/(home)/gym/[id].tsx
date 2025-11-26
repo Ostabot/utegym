@@ -1,5 +1,4 @@
-// app/(tabs)/(home)/gym/[id].tsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +8,7 @@ import {
   FlatList,
   Alert,
   Linking,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import MapboxGL from "@rnmapbox/maps";
@@ -19,11 +19,14 @@ import { useTranslation } from "react-i18next";
 
 import { supabase } from "@/lib/supabase";
 import type { Tables } from "@/lib/types";
-import { useWorkoutWizard } from "@/contexts/workout-wizard-context";
+import { useWorkoutWizard } from "src/contexts/workout-wizard-context";
+import { useSession } from "src/contexts/session-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useAppTheme } from "@/ui/useAppTheme";
-import AccessiblePressable from "@/ui/AccessiblePressable";
+import { useAppTheme } from "src/ui/useAppTheme";
+import AccessiblePressable from "src/ui/AccessiblePressable";
 import { saveLastMapAttributions } from "@/lib/mapAttributions";
+import * as FileSystem from 'expo-file-system';
+import { ensureGooglePhotoUrl } from "src/lib/googlePhotos";
 
 /* ----------------------------- helpers ----------------------------- */
 async function headOk(url: string): Promise<boolean> {
@@ -53,8 +56,8 @@ function hash32(s: string) {
 
 /* ----------------------------- Mapbox ------------------------------ */
 const MAPBOX_TOKEN =
-  Constants.expoConfig?.extra?.mapboxToken ??
-  Constants.manifestExtra?.mapboxToken ??
+  (Constants.expoConfig as any)?.extra?.mapboxToken ??
+  (Constants.manifestExtra as any)?.mapboxToken ??
   process.env.EXPO_PUBLIC_MAPBOX_TOKEN ??
   "";
 if (MAPBOX_TOKEN) MapboxGL.setAccessToken(MAPBOX_TOKEN);
@@ -85,6 +88,7 @@ type Gym = Tables<"gyms"> & {
   image_url: string | null;
   google_place_id: string | null;
   google_rating: number | null;
+  google_user_ratings_total: number | null;
   website: string | null;
 };
 
@@ -113,6 +117,7 @@ async function toPhotoUrlChecked(bucket: string, name: string) {
 export default function GymDetailsScreen() {
   const theme = useAppTheme();
   const { t, i18n } = useTranslation();
+  const { user } = useSession();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const gymId = useMemo(() => (Array.isArray(id) ? id[0] : id) ?? "", [id]);
 
@@ -124,11 +129,14 @@ export default function GymDetailsScreen() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [hasVisited, setHasVisited] = useState(false);
+  const [togglingFav, setTogglingFav] = useState(false);
+
   const { setGym: setWizardGym } = useWorkoutWizard();
   const cameraRef = useRef<MapboxGL.Camera>(null);
 
   const isEn = i18n.language?.startsWith("en");
-
   const hasCoords = !!(gym?.lat && gym?.lon);
 
   // Spara vilka kart-attributioner som gäller för denna vy
@@ -143,17 +151,18 @@ export default function GymDetailsScreen() {
     ]);
   }, [hasCoords]);
 
+  // Ladda gym + bilder
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         if (!gymId) throw new Error("missing-gym-id");
 
-        // 1) Hämta gym-rad inkl website + description_en
+        // 1) Hämta gym-rad inkl website + description_en + rating count
         const { data: gymRow, error: gErr } = await supabase
           .from("gyms")
           .select(
-            "id,name,city,address,lat,lon,description,description_en,image_url,google_place_id,google_rating,website"
+            "id,name,city,address,lat,lon,description,description_en,image_url,google_place_id,google_rating,google_user_ratings_total,website"
           )
           .eq("id", gymId)
           .single();
@@ -162,7 +171,7 @@ export default function GymDetailsScreen() {
         const full = gymRow as Gym;
         setGym(full);
 
-        /* -------- omslagsbild: 1) kommun 2) google 3) placeholder -------- */
+        /* -------- omslagsbild: 1) kommun 2) google 3) preview.photo_key 4) placeholder -------- */
         let pickedCover: string | number | null = null;
         let pickedAttr: CoverAttribution = { kind: "none" };
 
@@ -176,7 +185,7 @@ export default function GymDetailsScreen() {
           };
         }
 
-        // 2) Google (bästa fotot)
+        // 2) Google (bästa fotot via photos.place_id)
         if (!pickedCover && full.google_place_id) {
           const { data: gBest } = await supabase
             .from("photos")
@@ -190,12 +199,29 @@ export default function GymDetailsScreen() {
             const url = await toPhotoUrlChecked("google-photos-cache", best.name);
             if (url) {
               pickedCover = url;
-              pickedAttr = { kind: "google", authors: best.authors ?? null };
+              pickedAttr = { kind: "google", authors: (best as any).authors ?? null };
             }
           }
         }
 
-        // 3) Placeholder (deterministisk per gym)
+        // 3) gym_preview.photo_key om vi saknar både kommun och Google (COVER)
+        if (!pickedCover) {
+          const { data: pv } = await supabase
+            .from("gym_preview")
+            .select("photo_key")
+            .eq("id", gymId)
+            .single();
+          const key = (pv as any)?.photo_key as string | null;
+          if (key) {
+            const url = await ensureGooglePhotoUrl(key); // <-- v1 name -> edge func -> public URL
+            if (url) {
+              pickedCover = url;
+              pickedAttr = { kind: "google", authors: null };
+            }
+          }
+        }
+
+        // 4) Placeholder (deterministisk per gym)
         if (!pickedCover) {
           const idx = hash32(gymId) % PLACEHOLDERS.length;
           pickedCover = PLACEHOLDERS[idx];
@@ -222,7 +248,7 @@ export default function GymDetailsScreen() {
           });
         }
 
-        // Google-bilder
+        // Google-bilder (via photos)
         if (full.google_place_id) {
           const { data: gph } = await supabase
             .from("photos")
@@ -239,6 +265,26 @@ export default function GymDetailsScreen() {
                 id: `google-${r.id}`,
                 src: url,
                 attr: { kind: "google", authors: (r as any).authors ?? null },
+              });
+            }
+          }
+        }
+
+        // Fallback till preview.photo_key
+        if (!items.length) {
+          const { data: pv2 } = await supabase
+            .from("gym_preview")
+            .select("photo_key")
+            .eq("id", gymId)
+            .single();
+          const key2 = (pv2 as any)?.photo_key as string | null;
+          if (key2) {
+            const url = await ensureGooglePhotoUrl(key2);
+            if (url) {
+              items.push({
+                id: `preview-${gymId}`,
+                src: url,
+                attr: { kind: "google", authors: null },
               });
             }
           }
@@ -278,54 +324,127 @@ export default function GymDetailsScreen() {
     };
   }, [gymId]);
 
+  // Ladda favorit + visited-status
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!gymId) return;
+
+      // favorit (RLS: user_id = auth.uid())
+      try {
+        const { data: favRow, error: favErr } = await supabase
+          .from("gym_favorites")
+          .select("gym_id")
+          .eq("gym_id", gymId)
+          .limit(1)
+          .single();
+
+        if (active) setIsFavorite(!favErr && !!favRow);
+      } catch {
+        if (active) setIsFavorite(false);
+      }
+
+      // visited (pass som innehåller detta gym-id i plan.gym.id)
+      try {
+        const { count } = await supabase
+          .from("workout_sessions")
+          .select("id", { count: "exact", head: true })
+          .eq("plan->gym->>id", gymId);
+
+        if (active) setHasVisited((count ?? 0) > 0);
+      } catch {
+        if (active) setHasVisited(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [gymId, user?.id]);
+
   /* --------------------------- Upload flow --------------------------- */
   async function onUpload() {
     try {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert(t("gym.perms.title"), t("gym.perms.body"));
+        Alert.alert(t('gym.perms.title'), t('gym.perms.body'));
         return;
       }
+
       const pick = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: true,
         quality: 0.9,
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        selectionLimit: 1,
       });
       if (pick.canceled || !pick.assets?.length) return;
 
       const asset = pick.assets[0];
-      const ext = (asset.fileName?.split(".").pop() || "jpg").toLowerCase();
-      const path = `${gymId}/${Date.now()}.${ext}`;
 
-      const file = await fetch(asset.uri).then((r) => r.blob());
-      const { error: upErr } = await supabase.storage
-        .from("gym-photos")
-        .upload(path, file, {
-          upsert: false,
-          contentType: asset.mimeType ?? "image/jpeg",
+      const guessedExt =
+        asset.fileName?.split('.').pop()?.toLowerCase() ||
+        asset.mimeType?.split('/').pop()?.toLowerCase() ||
+        'jpg';
+      const ext = guessedExt === 'jpeg' ? 'jpg' : guessedExt;
+      const contentType = asset.mimeType ?? (ext === 'jpg' ? 'image/jpeg' : `image/${ext}`);
+      const objectPath = `${gymId}/${Date.now()}.${ext}`;
+
+      // 1) Skapa signed upload URL
+      const { data: signed, error: signErr } = await supabase
+        .storage.from('gym-photos')
+        .createSignedUploadUrl(objectPath);
+      if (signErr) throw signErr;
+
+      // 2) Ladda upp bilden (försök med Blob först)
+      let putRes: Response | { status: number; ok: boolean };
+      try {
+        const fileRes = await fetch(asset.uri);
+        const blob = await fileRes.blob();
+        putRes = await fetch(signed.signedUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': contentType,
+            'x-upsert': 'false',
+          },
+          body: blob,
         });
-      if (upErr) throw upErr;
+      } catch {
+        // Fallback: FileSystem.uploadAsync (OBS: ingen uploadType används)
+        const result = await FileSystem.uploadAsync(signed.signedUrl, asset.uri, {
+          httpMethod: 'PUT',
+          headers: {
+            'Content-Type': contentType,
+            'x-upsert': 'false',
+          },
+          // inget 'uploadType' här
+        });
+        putRes = { status: Number(result.status), ok: String(result.status).startsWith('2') };
+      }
 
+      if (!putRes.ok) {
+        throw new Error(`Upload failed (status ${putRes.status})`);
+      }
+
+      // 3) Spara rad i vår tabell
       const { data: inserted, error: insErr } = await supabase
-        .from("gym_photos")
-        .insert({ gym_id: gymId, name: path })
-        .select("id,name")
+        .from('gym_photos')
+        .insert({ gym_id: gymId, name: objectPath })
+        .select('id,name')
         .single();
       if (insErr) throw insErr;
 
-      const url = await toPhotoUrlChecked("gym-photos", inserted!.name!);
-      if (url) {
-        setGallery((prev) => [
-          { id: `user-${inserted!.id}`, src: url, attr: { kind: "user" } },
+      // 4) Visa direkt i galleriet
+      const { data: pub } = supabase.storage.from('gym-photos').getPublicUrl(inserted.name);
+      const publicUrl = pub?.publicUrl;
+      if (publicUrl) {
+        setGallery(prev => [
+          { id: `user-${inserted.id}`, src: publicUrl, attr: { kind: 'user' } },
           ...prev,
         ]);
       }
     } catch (e: any) {
       console.warn(e);
-      Alert.alert(
-        t("gym.uploadFailed.title"),
-        e?.message ?? t("gym.uploadFailed.fallback")
-      );
+      Alert.alert(t('gym.uploadFailed.title'), e?.message ?? t('gym.uploadFailed.fallback'));
     }
   }
 
@@ -355,6 +474,74 @@ export default function GymDetailsScreen() {
       await AsyncStorage.setItem("wizard.lastGym", JSON.stringify(payload));
     } catch { }
     router.push("/(tabs)/(train)/equipment");
+  }
+
+  /* -------------------- Favorite toggle handler --------------------- */
+  const toggleFavorite = useCallback(async () => {
+    if (!user?.id) {
+      Alert.alert(
+        t("gym.favorite.loginNeededTitle", "Logga in krävs"),
+        t("gym.favorite.loginNeededBody", "Du behöver vara inloggad för att spara favoriter."),
+        [
+          { text: t("common.cancel", "Avbryt"), style: "cancel" },
+          {
+            text: t("profile.login.title", "Logga in"),
+            onPress: () => router.push("/onboarding"),
+          },
+        ]
+      );
+      return;
+    }
+
+    try {
+      setTogglingFav(true);
+
+      if (!isFavorite) {
+        const { error } = await supabase
+          .from("gym_favorites")
+          .insert({ gym_id: gymId });
+        if (error) throw error;
+        setIsFavorite(true);
+      } else {
+        const { error } = await supabase
+          .from("gym_favorites")
+          .delete()
+          .eq("gym_id", gymId)
+          .eq("user_id", user.id); // ← FIXED
+        if (error) throw error;
+        setIsFavorite(false);
+      }
+    } catch (e: any) {
+      Alert.alert(
+        t("gym.favorite.failedTitle", "Kunde inte uppdatera favorit"),
+        String(e?.message ?? e)
+      );
+    } finally {
+      setTogglingFav(false);
+    }
+  }, [user?.id, isFavorite, gymId, t]);
+
+  /* --------------------- Open in Google Maps link -------------------- */
+  function openInGoogleMaps() {
+    if (!gym) return;
+
+    const hasPlace = !!gym.google_place_id;
+    const destLatLon =
+      gym.lat != null && gym.lon != null ? `${gym.lat},${gym.lon}` : null;
+
+    // Prefer destination_place_id if we have it; otherwise fall back to coordinates.
+    const url = hasPlace
+      ? `https://www.google.com/maps/dir/?api=1&destination_place_id=${encodeURIComponent(
+        gym.google_place_id!
+      )}&destination=${encodeURIComponent(gym.name ?? "utegym")}`
+      : destLatLon
+        ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+          destLatLon
+        )}`
+        : null;
+
+    if (!url) return;
+    Linking.openURL(url).catch(() => { });
   }
 
   /* ---------------------------- Loading/err -------------------------- */
@@ -401,8 +588,7 @@ export default function GymDetailsScreen() {
         commune: coverAttr.commune ?? t("gym.commune"),
       });
       const onPress = () => {
-        if (coverAttr.website)
-          Linking.openURL(coverAttr.website).catch(() => { });
+        if (coverAttr.website) Linking.openURL(coverAttr.website).catch(() => { });
       };
       return (
         <AccessiblePressable
@@ -437,6 +623,7 @@ export default function GymDetailsScreen() {
   /* ------------------------------- UI -------------------------------- */
   return (
     <FlatList
+      accessibilityLanguage={i18n.language}
       style={{ backgroundColor: theme.colors.bg }}
       contentContainerStyle={{ paddingBottom: 40 }}
       data={gallery}
@@ -464,23 +651,119 @@ export default function GymDetailsScreen() {
             )}
           </View>
 
-          <View style={{ padding: 16, gap: 8 }}>
-            <Text
-              style={[styles.title, { color: theme.colors.text }]}
-              accessibilityRole="header"
-            >
-              {gym.name}
-            </Text>
+          <View style={{ paddingHorizontal: 16, paddingTop: 10, gap: 6 }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={[styles.title, { color: theme.colors.text, flexShrink: 1, flexGrow: 1 }]}
+                accessibilityRole="header"
+              >
+                {gym.name}
+              </Text>
+
+              {/* ✅ Visited marker */}
+              {hasVisited && (
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: theme.colors.primary, borderColor: theme.colors.card },
+                  ]}
+                  accessibilityRole="text"
+                  accessibilityLabel={t("gym.visited.badge", "Besökt")}
+                >
+                  <Ionicons
+                    name="checkmark"
+                    size={14}
+                    color={theme.colors.primaryText}
+                  />
+                </View>
+              )}
+
+              {/* ❤️ Favorite toggle */}
+              <AccessiblePressable
+                onPress={toggleFavorite}
+                disabled={togglingFav}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isFavorite
+                    ? t("gym.favorite.remove", "Ta bort favorit")
+                    : t("gym.favorite.add", "Spara som favorit")
+                }
+                style={{ marginLeft: 8, padding: 6 }}
+              >
+                <Ionicons
+                  name={isFavorite ? "heart" : "heart-outline"}
+                  size={22}
+                  color={isFavorite ? "#22c55e" : theme.colors.text}
+                />
+              </AccessiblePressable>
+            </View>
+
             <Text style={[styles.sub, { color: theme.colors.subtext }]}>
               {[gym.address, gym.city].filter(Boolean).join(", ") ||
                 t("gym.addressMissing")}
             </Text>
-            {gym.google_rating != null && (
-              <Text style={[styles.meta, { color: theme.colors.text }]}>
-                {t("gym.rating", {
-                  r: Number(gym.google_rating).toFixed(1),
-                })}
-              </Text>
+
+            {/* Google rating + count */}
+            {(gym.google_rating != null ||
+              gym.google_user_ratings_total != null) && (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Ionicons
+                    name="star"
+                    size={16}
+                    color={theme.colors.primary}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
+                  />
+                  <Text style={[styles.meta, { color: theme.colors.text }]}>
+                    {gym.google_rating != null
+                      ? Number(gym.google_rating).toFixed(1)
+                      : "—"}
+                  </Text>
+                  {gym.google_user_ratings_total != null && (
+                    <Text style={[styles.meta, { color: theme.colors.subtext }]}>
+                      ({gym.google_user_ratings_total})
+                    </Text>
+                  )}
+                </View>
+              )}
+
+            {/* Öppna i Google Maps */}
+            {(gym.google_place_id || (gym.lat && gym.lon)) && (
+              <AccessiblePressable
+                onPress={openInGoogleMaps}
+                accessibilityRole="link"
+                accessibilityLabel={
+                  gym.google_place_id
+                    ? t(
+                      "gym.openInGMaps.a11yWithPlace",
+                      "Öppna vägbeskrivning till plats-ID i Google Maps"
+                    )
+                    : t("gym.openInGMaps.a11y", "Öppna vägbeskrivning i Google Maps")
+                }
+                accessibilityHint={t(
+                  "gym.openInGMaps.hint",
+                  "Öppnar Google Maps med vägbeskrivning till utegymmet."
+                )}
+                style={[
+                  styles.mapLink,
+                  {
+                    borderColor: theme.colors.border,
+                    backgroundColor: theme.colors.card,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="navigate"
+                  size={16}
+                  color={theme.colors.text}
+                  style={{ marginRight: 6 }}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                />
+                <Text style={{ color: theme.colors.text, fontWeight: "700" }}>
+                  {t("gym.openInGMaps", "Öppna i Google Maps")}
+                </Text>
+              </AccessiblePressable>
             )}
           </View>
 
@@ -550,9 +833,7 @@ export default function GymDetailsScreen() {
                     "Öppnar en sida med detaljerad information om kartdata, kommuner och licenser."
                   )}
                 >
-                  <Text
-                    style={{ color: theme.colors.subtext, fontSize: 11 }}
-                  >
+                  <Text style={{ color: theme.colors.subtext, fontSize: 11 }}>
                     Kartdata © Mapbox · © OpenStreetMap
                   </Text>
                 </AccessiblePressable>
@@ -622,9 +903,7 @@ export default function GymDetailsScreen() {
           {/* Beskrivning (SV/EN beroende på språk) */}
           {descriptionText ? (
             <View style={{ paddingHorizontal: 16, marginTop: 4 }}>
-              <Text
-                style={[styles.descTitle, { color: theme.colors.text }]}
-              >
+              <Text style={[styles.descTitle, { color: theme.colors.text }]}>
                 {t("gym.descriptionTitle", "Beskrivning")}
               </Text>
               <Text style={[styles.descBody, { color: theme.colors.text }]}>
@@ -668,9 +947,7 @@ export default function GymDetailsScreen() {
               }
             />
             {/* Attribution under varje bild (visuell) */}
-            <Text
-              style={[styles.photoCaption, { color: theme.colors.subtext }]}
-            >
+            <Text style={[styles.photoCaption, { color: theme.colors.subtext }]}>
               {item.attr.kind === "google" &&
                 t("gym.photo.google", {
                   authors: item.attr.authors || t("gym.unknown"),
@@ -711,6 +988,25 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: "800" },
   sub: {},
   meta: { marginTop: 4, fontWeight: "600" },
+
+  badge: {
+    marginLeft: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+
+  // liten knapp-länk för Google Maps
+  mapLink: {
+    flexDirection: "row",
+    alignSelf: "flex-start",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: 6,
+  },
 
   mapWrap: {
     height: 180,

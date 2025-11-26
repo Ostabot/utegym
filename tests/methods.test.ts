@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Tables } from '@/lib/types';
-import { parseMethodScheme } from '@/utils/methods';
+import { parseMethodScheme } from 'src/utils/methods';
 
 describe('parseMethodScheme', () => {
   it('uses defaults when scheme missing', () => {

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import NetInfo from '@react-native-community/netinfo';
-import { syncPendingWorkouts } from '@/lib/workout-sync';
+import { syncPendingWorkouts } from 'src/lib/workout-sync';
 
 export function usePendingWorkoutSync() {
   useEffect(() => {

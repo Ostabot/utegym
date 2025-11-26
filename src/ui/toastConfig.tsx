@@ -1,7 +1,7 @@
 // src/ui/toastConfig.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import type { Theme } from '@/ui/theme'; // din Theme-typ om du har den
+import type { Theme } from 'src/ui/theme'; // din Theme-typ om du har den
 
 export function makeToastConfig(t: Theme['colors']) {
   const Base = ({ text1, text2 }: any) => (

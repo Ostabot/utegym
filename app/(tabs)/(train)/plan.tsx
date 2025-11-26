@@ -1,11 +1,11 @@
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
-import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
-import { useCurrentRun } from '@/contexts/current-run-context';
-import { supabase } from '@/lib/supabase';
-import { useAppTheme } from '@/ui/useAppTheme';
-import { useSession } from '@/contexts/session-context';
+import { useWorkoutWizard } from 'src/contexts/workout-wizard-context';
+import { useCurrentRun } from 'src/contexts/current-run-context';
+import { supabase } from 'src/lib/supabase';
+import { useAppTheme } from 'src/ui/useAppTheme';
+import { useSession } from 'src/contexts/session-context';
 import { useTranslation } from 'react-i18next';
 
 export default function TrainPlanScreen() {

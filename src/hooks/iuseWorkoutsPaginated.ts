@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useSession } from '@/contexts/session-context';
+import { useSession } from 'src/contexts/session-context';
 
 type Row = {
   id: string;

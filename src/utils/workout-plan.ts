@@ -1,5 +1,5 @@
 import type { Tables } from '@/lib/types';
-import type { ExercisePrescription, WizardExercise } from '@/types/workout';
+import type { ExercisePrescription, WizardExercise } from 'src/types/workout';
 
 export function buildWizardExercises(
   exercises: Tables<'outdoor_exercises_v2'>[],

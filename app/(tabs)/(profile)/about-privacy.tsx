@@ -1,7 +1,7 @@
 // app/(tabs)/(profile)/about-privacy.tsx
 import React, { useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Pressable, Linking } from 'react-native';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 
 export default function AboutPrivacy() {
   const theme = useAppTheme();

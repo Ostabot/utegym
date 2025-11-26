@@ -1,7 +1,7 @@
 // app/run/index.tsx
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
 
 export default function RunIndex() {

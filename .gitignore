@@ -42,7 +42,6 @@ venv/
 .envrc
 
 # OS/verktygsfiler
-.DS_Store
 .watchmanconfig.json
 
 # Supabase temp

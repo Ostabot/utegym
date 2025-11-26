@@ -1,17 +1,22 @@
 // app/(tabs)/(profile)/settings.tsx
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TextInput, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Alert, ScrollView, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import { supabase } from '@/lib/supabase';
-import { useSession } from '@/contexts/session-context';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useSession } from 'src/contexts/session-context';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useRouter } from 'expo-router';
 import { queryClient } from '@/lib/queryClient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { setAppLanguage, i18n } from '@/lib/i18n';
-import AccessiblePressable from '@/ui/AccessiblePressable';
+import { setAppLanguage, i18n } from 'src/lib/i18n';
+import AccessiblePressable from 'src/ui/AccessiblePressable';
+
+/* Apple Sign In */
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
+import 'react-native-get-random-values';
 
 const LANG_KEY = 'utegym.lang';
 const INTENSITY_KEY = 'utegym.default-intensity';
@@ -30,12 +35,73 @@ function validateAlias(clean: string, t: (k: string, def?: string) => string) {
   return null;
 }
 
+/** Signera in med Apple: hämtar Apple ID-token och loggar in mot Supabase med nonce */
+async function signInWithAppleNative() {
+  const available =
+    Platform.OS === 'ios' &&
+    (await AppleAuthentication.isAvailableAsync());
+
+  if (!available) throw new Error('Apple Sign In is not available on this device.');
+
+  // Rå nonce (random räcker – UUID duger här), Apple får SHA-256(nonce)
+  const rawNonce = Crypto.randomUUID();
+  const hashedNonce = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    rawNonce
+  );
+
+  const credential = await AppleAuthentication.signInAsync({
+    requestedScopes: [
+      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+      AppleAuthentication.AppleAuthenticationScope.EMAIL,
+    ],
+    nonce: hashedNonce,
+  });
+
+  if (!credential.identityToken) {
+    throw new Error('No identity token returned from Apple.');
+  }
+
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: 'apple',
+    token: credential.identityToken,
+    nonce: rawNonce,
+  });
+  if (error) throw error;
+
+  return data.session;
+}
+
 export default function ProfileSettingsScreen() {
   const theme = useAppTheme();
   const router = useRouter();
   const { user } = useSession();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+
+  // Visa Apple-knappen endast när den är tillgänglig (iOS 13+ och device stöder SIWA)
+  const [appleAvailable, setAppleAvailable] = useState(false);
+  const [appleWhy, setAppleWhy] = useState<string | null>(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        if (Platform.OS !== 'ios') {
+          setAppleAvailable(false);
+          setAppleWhy('Endast iOS');
+          return;
+        }
+        // Rely only on AppleAuthentication.isAvailableAsync()
+        const ok = await AppleAuthentication.isAvailableAsync();
+        setAppleAvailable(ok);
+        setAppleWhy(ok ? null : 'Sign in with Apple är inte tillgängligt i denna build.');
+        console.log('SIWA available (Settings)?', ok);
+      } catch (e: any) {
+        setAppleAvailable(false);
+        setAppleWhy(String(e?.message ?? e));
+        console.log('SIWA check failed (Settings):', e);
+      }
+    })();
+  }, []);
 
   // state
   const [alias, setAlias] = useState<string>('');
@@ -49,24 +115,36 @@ export default function ProfileSettingsScreen() {
   ];
 
   useEffect(() => {
-    // init alias + intensity
     setAlias((user?.user_metadata as any)?.alias ?? '');
     AsyncStorage.getItem(INTENSITY_KEY).then((stored) => {
       if (stored === 'easy' || stored === 'medium' || stored === 'hard') setIntensity(stored);
     });
-    // init language from storage (overrides i18n default if present)
     AsyncStorage.getItem(LANG_KEY).then((v) => {
       if (v === 'en' || v === 'sv') setLang(v);
     });
   }, [user?.id]);
 
-  // language toggle handler (separate from save)
   const handleChangeLang = useCallback(async (next: 'sv' | 'en') => {
     setLang(next);
-    await setAppLanguage(next); // ändrar i18n + sparar i AsyncStorage
-    // Om du har serversträngar -> gör en bred refetch
-    // await queryClient.invalidateQueries();
+    await setAppLanguage(next);
   }, []);
+
+  const handleApplePress = useCallback(async () => {
+    try {
+      await signInWithAppleNative();
+      Toast.show({ type: 'success', text1: t('auth.apple.signedIn', 'Inloggad med Apple') });
+      await queryClient.invalidateQueries();
+    } catch (e: any) {
+      const msg = String(e?.message ?? e);
+      // Avbruten inloggning = tyst
+      if (e?.code === 'ERR_CANCELED' || /canceled/i.test(msg)) return;
+      Toast.show({
+        type: 'error',
+        text1: t('auth.apple.failed.title', 'Kunde inte logga in med Apple'),
+        text2: msg,
+      });
+    }
+  }, [t]);
 
   async function save() {
     const cleanAlias = normalizeAlias(alias);
@@ -78,11 +156,9 @@ export default function ProfileSettingsScreen() {
 
     try {
       if (user?.id) {
-        // 1) sätt alias i DB via RPC (validering/unikhet på serversidan)
         const { error: aliasErr } = await supabase.rpc('set_alias', { p_alias: cleanAlias });
         if (aliasErr) throw aliasErr;
 
-        // 2) spegla i user_metadata för enkel klientåtkomst
         const { error: metaErr } = await supabase.auth.updateUser({
           data: { alias: cleanAlias, preferred_locale: lang },
         });
@@ -121,10 +197,7 @@ export default function ProfileSettingsScreen() {
   const deleteMyAccount = useCallback(() => {
     Alert.alert(
       t('account.delete.title', 'Radera konto'),
-      t(
-        'account.delete.body',
-        'Detta tar bort ditt konto och alla träningspass. Åtgärden kan inte ångras.'
-      ),
+      t('account.delete.body', 'Detta tar bort ditt konto och alla träningspass. Åtgärden kan inte ångras.'),
       [
         { text: t('common.cancel', 'Avbryt'), style: 'cancel' },
         {
@@ -154,32 +227,36 @@ export default function ProfileSettingsScreen() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.colors.bg }}
-      contentContainerStyle={{
-        padding: 20,
-        gap: 16,
-        paddingBottom: 24 + insets.bottom,
-      }}
+      contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 24 + insets.bottom }}
       keyboardShouldPersistTaps="handled"
     >
-      {/* Alias */}
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
-        ]}
-      >
-        <Text style={[styles.title, { color: theme.colors.text }]}>
-          {t('settings.alias.title', 'Alias')}
+      {/* Felsökning om Apple-knappen inte visas */}
+      {!appleAvailable && !!appleWhy && (
+        <Text style={{ color: theme.colors.subtext, fontSize: 12 }}>
+          Apple-inloggning ej tillgänglig: {appleWhy}
         </Text>
-        <View
-          style={[
-            styles.inputWrap,
-            {
-              borderColor: theme.colors.border,
-              backgroundColor: theme.colors.bg,
-            },
-          ]}
-        >
+      )}
+
+      {/* Sign in with Apple – native Apple-knapp enligt HIG */}
+      {appleAvailable && (
+        <AppleAuthentication.AppleAuthenticationButton
+          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+          buttonStyle={
+            theme.name === 'dark'
+              ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+              : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+          }
+          cornerRadius={12}
+          style={{ width: '100%', height: 48, marginBottom: 4 }}
+          onPress={handleApplePress}
+          accessibilityLabel={t('auth.apple.buttonLabel', 'Logga in med Apple')}
+        />
+      )}
+
+      {/* Alias */}
+      <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>{t('settings.alias.title', 'Alias')}</Text>
+        <View style={[styles.inputWrap, { borderColor: theme.colors.border, backgroundColor: theme.colors.bg }]}>
           <TextInput
             placeholder={t('settings.alias.placeholder', 't.ex. @styrkeLisa')}
             placeholderTextColor={theme.colors.subtext}
@@ -188,10 +265,7 @@ export default function ProfileSettingsScreen() {
             autoCapitalize="none"
             style={[styles.input, { color: theme.colors.text }]}
             returnKeyType="done"
-            accessibilityLabel={t(
-              'settings.alias.accessibility.label',
-              'Alias för din profil'
-            )}
+            accessibilityLabel={t('settings.alias.accessibility.label', 'Alias för din profil')}
             accessibilityHint={t(
               'settings.alias.accessibility.hint',
               'Ange ett alias som kan visas i appen, till exempel när du delar pass.'
@@ -201,26 +275,10 @@ export default function ProfileSettingsScreen() {
       </View>
 
       {/* Standardintensitet */}
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
-        ]}
-      >
-        <Text style={[styles.title, { color: theme.colors.text }]}>
-          {t('settings.intensity.title', 'Standardintensitet')}
-        </Text>
-        <Text
-          style={{
-            color: theme.colors.subtext,
-            fontSize: 13,
-            marginBottom: 4,
-          }}
-        >
-          {t(
-            'settings.intensity.description',
-            'Används som förval när du startar ett nytt pass i träningsguiden.'
-          )}
+      <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>{t('settings.intensity.title', 'Standardintensitet')}</Text>
+        <Text style={{ color: theme.colors.subtext, fontSize: 13, marginBottom: 4 }}>
+          {t('settings.intensity.description', 'Används som förval när du startar ett nytt pass i träningsguiden.')}
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
           {pills.map((p) => {
@@ -231,34 +289,18 @@ export default function ProfileSettingsScreen() {
                 onPress={() => setIntensity(p.key)}
                 style={[
                   styles.pill,
-                  {
-                    borderColor: theme.colors.border,
-                    backgroundColor: theme.colors.card,
-                    minHeight: 44,
-                    justifyContent: 'center',
-                  },
+                  { borderColor: theme.colors.border, backgroundColor: theme.colors.card, minHeight: 44, justifyContent: 'center' },
                   active && { backgroundColor: theme.colors.primary },
                 ]}
                 accessibilityRole="button"
-                accessibilityLabel={t(
-                  'settings.intensity.accessibility.label',
-                  'Standardintensitet: {{label}}',
-                  { label: p.label }
-                )}
+                accessibilityLabel={t('settings.intensity.accessibility.label', 'Standardintensitet: {{label}}', { label: p.label })}
                 accessibilityState={{ selected: active }}
                 accessibilityHint={t(
                   'settings.intensity.accessibility.hint',
                   'Sätter den här nivån som förvald intensitet när du startar nya pass.'
                 )}
               >
-                <Text
-                  style={{
-                    color: active ? theme.colors.primaryText : theme.colors.text,
-                    fontWeight: '700',
-                  }}
-                >
-                  {p.label}
-                </Text>
+                <Text style={{ color: active ? theme.colors.primaryText : theme.colors.text, fontWeight: '700' }}>{p.label}</Text>
               </AccessiblePressable>
             );
           })}
@@ -266,26 +308,10 @@ export default function ProfileSettingsScreen() {
       </View>
 
       {/* Språk */}
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
-        ]}
-      >
-        <Text style={[styles.title, { color: theme.colors.text }]}>
-          {t('settings.language.title', 'Språk')}
-        </Text>
-        <Text
-          style={{
-            color: theme.colors.subtext,
-            fontSize: 13,
-            marginBottom: 4,
-          }}
-        >
-          {t(
-            'settings.language.description',
-            'Välj vilket språk appens gränssnitt ska visas på.'
-          )}
+      <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>{t('settings.language.title', 'Språk')}</Text>
+        <Text style={{ color: theme.colors.subtext, fontSize: 13, marginBottom: 4 }}>
+          {t('settings.language.description', 'Välj vilket språk appens gränssnitt ska visas på.')}
         </Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {(['sv', 'en'] as const).map((code) => {
@@ -297,34 +323,15 @@ export default function ProfileSettingsScreen() {
                 onPress={() => handleChangeLang(code)}
                 style={[
                   styles.pill,
-                  {
-                    borderColor: theme.colors.border,
-                    backgroundColor: theme.colors.card,
-                    minHeight: 44,
-                    justifyContent: 'center',
-                  },
+                  { borderColor: theme.colors.border, backgroundColor: theme.colors.card, minHeight: 44, justifyContent: 'center' },
                   active && { backgroundColor: theme.colors.primary },
                 ]}
                 accessibilityRole="button"
-                accessibilityLabel={t(
-                  'settings.language.accessibility.label',
-                  'Språk: {{label}}',
-                  { label }
-                )}
+                accessibilityLabel={t('settings.language.accessibility.label', 'Språk: {{label}}', { label })}
                 accessibilityState={{ selected: active }}
-                accessibilityHint={t(
-                  'settings.language.accessibility.hint',
-                  'Byter språk i appens menyer och texter.'
-                )}
+                accessibilityHint={t('settings.language.accessibility.hint', 'Byter språk i appens menyer och texter.')}
               >
-                <Text
-                  style={{
-                    color: active ? theme.colors.primaryText : theme.colors.text,
-                    fontWeight: '700',
-                  }}
-                >
-                  {label}
-                </Text>
+                <Text style={{ color: active ? theme.colors.primaryText : theme.colors.text, fontWeight: '700' }}>{label}</Text>
               </AccessiblePressable>
             );
           })}
@@ -333,150 +340,76 @@ export default function ProfileSettingsScreen() {
 
       {/* Spara-knapp */}
       <AccessiblePressable
-        style={[
-          styles.primaryButton,
-          { backgroundColor: theme.colors.primary, minHeight: 44 },
-        ]}
+        style={[styles.primaryButton, { backgroundColor: theme.colors.primary, minHeight: 44 }]}
         onPress={save}
         accessibilityRole="button"
         accessibilityLabel={t('common.save', 'Spara inställningar')}
-        accessibilityHint={t(
-          'settings.save.hint',
-          'Sparar alias, standardintensitet och språk för din profil.'
-        )}
+        accessibilityHint={t('settings.save.hint', 'Sparar alias, standardintensitet och språk för din profil.')}
       >
-        <Text style={[styles.primaryText, { color: theme.colors.primaryText }]}>
-          {t('common.save', 'Spara')}
-        </Text>
+        <Text style={[styles.primaryText, { color: theme.colors.primaryText }]}>{t('common.save', 'Spara')}</Text>
       </AccessiblePressable>
 
       {/* Länkar */}
       <View style={{ height: 12 }} />
 
       <AccessiblePressable
-        style={[
-          styles.linkBtn,
-          { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' },
-        ]}
+        style={[styles.linkBtn, { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' }]}
         onPress={() => router.push('/(tabs)/(profile)/about-attributions')}
         accessibilityRole="button"
-        accessibilityLabel={t(
-          'settings.links.attrib',
-          'Attributioner och licenser'
-        )}
-        accessibilityHint={t(
-          'settings.links.attrib.hint',
-          'Öppnar en sida med information om datakällor och licenser.'
-        )}
+        accessibilityLabel={t('settings.links.attrib', 'Attributioner och licenser')}
+        accessibilityHint={t('settings.links.attrib.hint', 'Öppnar en sida med information om datakällor och licenser.')}
       >
-        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>
-          {t('settings.links.attrib', 'Attributioner & licenser')}
-        </Text>
+        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>{t('settings.links.attrib', 'Attributioner & licenser')}</Text>
       </AccessiblePressable>
 
       <AccessiblePressable
-        style={[
-          styles.linkBtn,
-          { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' },
-        ]}
+        style={[styles.linkBtn, { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' }]}
         onPress={() => router.push('/(tabs)/(profile)/about-oss-licenses')}
         accessibilityRole="button"
-        accessibilityLabel={t(
-          'settings.links.oss',
-          'Öppen källkod och beroenden'
-        )}
-        accessibilityHint={t(
-          'settings.links.oss.hint',
-          'Visar lista över tredjepartsbibliotek och licenser.'
-        )}
+        accessibilityLabel={t('settings.links.oss', 'Öppen källkod och beroenden')}
+        accessibilityHint={t('settings.links.oss.hint', 'Visar lista över tredjepartsbibliotek och licenser.')}
       >
-        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>
-          {t('settings.links.oss', 'Öppen källkod (beroenden)')}
-        </Text>
+        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>{t('settings.links.oss', 'Öppen källkod (beroenden)')}</Text>
       </AccessiblePressable>
 
       <AccessiblePressable
-        style={[
-          styles.linkBtn,
-          { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' },
-        ]}
+        style={[styles.linkBtn, { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' }]}
         onPress={() => router.push('/(tabs)/(profile)/about-map-attributions')}
         accessibilityRole="button"
-        accessibilityLabel={t(
-          'settings.links.map',
-          'Kart-attributioner'
-        )}
-        accessibilityHint={t(
-          'settings.links.map.hint',
-          'Öppnar en sida med attributioner för Mapbox, OpenStreetMap och kommundata.'
-        )}
+        accessibilityLabel={t('settings.links.map', 'Kart-attributioner')}
+        accessibilityHint={t('settings.links.map.hint', 'Öppnar en sida med attributioner för Mapbox, OpenStreetMap och kommundata.')}
       >
-        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>
-          {t('settings.links.map', 'Kart-attributioner')}
-        </Text>
+        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>{t('settings.links.map', 'Kart-attributioner')}</Text>
       </AccessiblePressable>
 
       <AccessiblePressable
-        style={[
-          styles.linkBtn,
-          { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' },
-        ]}
+        style={[styles.linkBtn, { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' }]}
         onPress={() => router.push('/(tabs)/(profile)/about-privacy')}
         accessibilityRole="button"
-        accessibilityLabel={t(
-          'settings.links.privacy',
-          'Integritetspolicy'
-        )}
-        accessibilityHint={t(
-          'settings.links.privacy.hint',
-          'Visar hur vi hanterar dina personuppgifter och träningsdata.'
-        )}
+        accessibilityLabel={t('settings.links.privacy', 'Integritetspolicy')}
+        accessibilityHint={t('settings.links.privacy.hint', 'Visar hur vi hanterar dina personuppgifter och träningsdata.')}
       >
-        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>
-          {t('settings.links.privacy', 'Integritetspolicy')}
-        </Text>
+        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>{t('settings.links.privacy', 'Integritetspolicy')}</Text>
       </AccessiblePressable>
 
       <AccessiblePressable
-        style={[
-          styles.linkBtn,
-          { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' },
-        ]}
+        style={[styles.linkBtn, { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' }]}
         onPress={() => router.push('/(tabs)/(profile)/about-terms')}
         accessibilityRole="button"
-        accessibilityLabel={t(
-          'settings.links.terms',
-          'Användarvillkor'
-        )}
-        accessibilityHint={t(
-          'settings.links.terms.hint',
-          'Visar villkoren för att använda Utegym-appen.'
-        )}
+        accessibilityLabel={t('settings.links.terms', 'Användarvillkor')}
+        accessibilityHint={t('settings.links.terms.hint', 'Visar villkoren för att använda Utegym-appen.')}
       >
-        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>
-          {t('settings.links.terms', 'Användarvillkor')}
-        </Text>
+        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>{t('settings.links.terms', 'Användarvillkor')}</Text>
       </AccessiblePressable>
 
       <AccessiblePressable
-        style={[
-          styles.linkBtn,
-          { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' },
-        ]}
+        style={[styles.linkBtn, { borderColor: theme.colors.border, minHeight: 44, justifyContent: 'center' }]}
         onPress={deleteMyAccount}
         accessibilityRole="button"
-        accessibilityLabel={t(
-          'settings.links.deleteAccount',
-          'Radera mitt konto'
-        )}
-        accessibilityHint={t(
-          'settings.links.deleteAccount.hint',
-          'Öppnar en bekräftelseruta för att radera ditt konto och all träningsdata.'
-        )}
+        accessibilityLabel={t('settings.links.deleteAccount', 'Radera mitt konto')}
+        accessibilityHint={t('settings.links.deleteAccount.hint', 'Öppnar en bekräftelseruta för att radera ditt konto och all träningsdata.')}
       >
-        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>
-          {t('settings.links.deleteAccount', 'Radera mitt konto')}
-        </Text>
+        <Text style={{ color: theme.colors.text, fontWeight: '700' }}>{t('settings.links.deleteAccount', 'Radera mitt konto')}</Text>
       </AccessiblePressable>
     </ScrollView>
   );
@@ -487,23 +420,8 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '800' },
   inputWrap: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 12 },
   input: { paddingVertical: 10 },
-  pill: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    borderWidth: 1,
-  },
-  primaryButton: {
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
+  pill: { paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1 },
+  primaryButton: { paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginTop: 8 },
   primaryText: { fontWeight: '800' },
-  linkBtn: {
-    borderWidth: 1,
-    borderRadius: 12,
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
+  linkBtn: { borderWidth: 1, borderRadius: 12, alignItems: 'center', paddingVertical: 12 },
 });

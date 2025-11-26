@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEYS } from '@/lib/storage/keys';
+import { STORAGE_KEYS } from 'src/lib/storage/keys';
 import { supabase } from '@/lib/supabase';
-import type { PendingWorkout, WorkoutExerciseLog } from '@/types/workout';
+import type { PendingWorkout, WorkoutExerciseLog } from 'src/types/workout';
 
 async function persistPendingWorkouts(workouts: PendingWorkout[]) {
   await AsyncStorage.setItem(STORAGE_KEYS.pendingWorkouts, JSON.stringify(workouts));

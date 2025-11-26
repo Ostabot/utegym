@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
 import { Stack, router } from 'expo-router';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { supabase } from '@/lib/supabase';
-import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useWorkoutWizard } from 'src/contexts/workout-wizard-context';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
 
 const PLACEHOLDER = require('../../../assets/gym-placeholder.jpg');

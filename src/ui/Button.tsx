@@ -1,5 +1,5 @@
 import { Pressable, Text, StyleSheet } from 'react-native';
-import { useThemePreference as useTheme } from '@/contexts/theme-context';
+import { useThemePreference as useTheme } from 'src/contexts/theme-context';
 import { tokens } from './tokens';
 
 type Props = { title: string; onPress: () => void; variant?: 'primary' | 'outline' };

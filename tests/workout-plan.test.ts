@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Tables } from '@/lib/types';
-import { buildWizardExercises, toggleExerciseSelection, updateExercisePrescription } from '@/utils/workout-plan';
-import type { ExercisePrescription, WizardExercise } from '@/types/workout';
+import { buildWizardExercises, toggleExerciseSelection, updateExercisePrescription } from 'src/utils/workout-plan';
+import type { ExercisePrescription, WizardExercise } from 'src/types/workout';
 
 const baseExercises: Tables<'outdoor_exercises_v2'>[] = [
   {

@@ -18,11 +18,11 @@ import * as Linking from 'expo-linking';
 import * as ImagePicker from 'expo-image-picker';
 
 import { supabase } from '@/lib/supabase';
-import { useSession } from '@/contexts/session-context';
-import { getPendingWorkouts } from '@/lib/workout-sync';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useSession } from 'src/contexts/session-context';
+import { getPendingWorkouts } from 'src/lib/workout-sync';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
-import AccessiblePressable from '@/ui/AccessiblePressable';
+import AccessiblePressable from 'src/ui/AccessiblePressable';
 
 const REDIRECT_TO = 'utegym://auth/callback';
 

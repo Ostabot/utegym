@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native';
-import { WorkoutWizardProvider } from '@/contexts/workout-wizard-context';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { WorkoutWizardProvider } from 'src/contexts/workout-wizard-context';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
 
 export default function TabsLayout() {

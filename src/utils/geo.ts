@@ -1,4 +1,4 @@
-import type { Coordinates } from '@/hooks/useUserLocation';
+import type { Coordinates } from 'src/hooks/useUserLocation';
 
 const EARTH_RADIUS_KM = 6371;
 

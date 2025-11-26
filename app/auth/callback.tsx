@@ -5,7 +5,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import * as Linking from 'expo-linking';
 import Toast from 'react-native-toast-message';
 import { supabase } from '@/lib/supabase';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 
 export default function AuthCallback() {
   const t = useAppTheme();

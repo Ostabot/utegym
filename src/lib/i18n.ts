@@ -4,8 +4,8 @@ import { initReactI18next } from 'react-i18next';
 import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import sv from '@/locales/sv.json';
-import en from '@/locales/en.json';
+import sv from 'src/locales/sv.json';
+import en from 'src/locales/en.json';
 
 const STORAGE_KEY = 'utegym.lang';
 

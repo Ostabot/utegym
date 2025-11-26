@@ -1,11 +1,11 @@
 // src/components/WorkoutSummaryCard.tsx
 import React from 'react';
 import { View, Text, Image } from 'react-native';
-import Card from '@/ui/Card';
-import Chip from '@/ui/Chip';
-import { useAppTheme } from '@/ui/useAppTheme';
+import Card from 'src/ui/Card';
+import Chip from 'src/ui/Chip';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
-import type { Focus, Intensity } from '@/lib/workout';
+import type { Focus, Intensity } from 'src/lib/workout';
 
 type PlanExercise = {
   key: string;

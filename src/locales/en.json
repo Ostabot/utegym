@@ -100,7 +100,36 @@
   "auth": {
     "loggedIn": "You’re signed in",
     "loginFailed": "Sign-in failed",
-    "missingCode": "Missing auth code"
+    "missingCode": "Missing auth code",
+    "apple": {
+      "buttonLabel": "Sign in with Apple",
+      "failed": {
+        "title": "Apple sign-in failed"
+      }
+    },
+    "google": {
+      "signIn": "Sign in with Google",
+      "failed": {
+        "title": "Google sign-in failed"
+      }
+    },
+    "magic": {
+      "title": "Magic link",
+      "placeholder": "you@email.com",
+      "inputLabel": "Email address for magic link",
+      "send": "Send link",
+      "badEmail": {
+        "title": "Invalid email",
+        "body": "Enter a valid address."
+      },
+      "sent": {
+        "title": "Link sent",
+        "body": "Check your inbox and open the link on this device."
+      },
+      "failed": {
+        "title": "Could not send link"
+      }
+    }
   },
   "home": {
     "title": "Outdoor gyms",
@@ -108,7 +137,8 @@
     "searchPlaceholder": "Search outdoor gym, city or address",
     "cta": {
       "findNearby": "Tap to find outdoor gyms near you",
-      "enableLocation": "Enable location to find nearby"
+      "enableLocation": "Enable location to find nearby",
+      "hint": "Show outdoor gyms close to your position and move the map"
     },
     "locationKnown": "Location: {{lat}}, {{lon}}",
     "locationUnknown": "Location: unknown",
@@ -121,6 +151,21 @@
     "meta": {
       "distanceKmAway": "{{km}} km away",
       "rating": "Rating {{r}}"
+    },
+    "search": {
+      "accessibilityLabel": "Search for outdoor gym name, city or address",
+      "accessibilityHint": "Write a suggestion and results will be shown below"
+    },
+    "myLocation": {
+      "label": "Center the map around my location",
+      "hint": "The position of the map will be moved to your current position"
+    },
+    "a11y": {
+      "resultsCount": "{{count}} outdoor gyms were found "
+    },
+    "header": {
+      "nearby": "Closest to you",
+      "cluster": "Outdoor gyms in the selected area"
     }
   },
   "gym": {
@@ -133,7 +178,7 @@
     "rating": "Rating: {{r}} ★",
     "createWorkout": "Start workout",
     "uploadPhoto": "Upload photo",
-    "Beskrivning": "Description",
+    "descriptionTitle": "Description",
     "photos": {
       "title": "Photos",
       "empty": "No uploaded photos yet."
@@ -358,6 +403,33 @@
     "share": {
       "title": "Share your workout",
       "message": "Check out my workout at {{gym}}! {{link}}"
+    }
+  },
+  "onboarding": {
+    "title": "Welcome!",
+    "subtitle": "Sign in to save workouts, photos and unlock full functionality.",
+    "guest": "Continue as guest",
+    "language": {
+      "title": "Language",
+      "a11y": "Choose language: {{label}}"
+    },
+    "legal": {
+      "prefix": "By continuing you agree to our",
+      "and": "and",
+      "full": "By continuing you agree to the terms of service and privacy policy."
+    }
+  },
+  "legal": {
+    "terms": "terms of service",
+    "privacy": "privacy policy"
+  },
+  "fav": {
+    "added": "Saved to favorites",
+    "removed": "Removed from favorites",
+    "error": "Could not update favorite",
+    "a11y": {
+      "add": "Add to favorites",
+      "remove": "Remove from favorites"
     }
   }
 }

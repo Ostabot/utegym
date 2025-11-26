@@ -10,10 +10,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
-import { useGyms, type GymFilter } from '@/hooks/useGyms';
+import { useWorkoutWizard } from 'src/contexts/workout-wizard-context';
+import { useGyms, type GymFilter } from 'src/hooks/useGyms';
 import type { Tables } from '@/lib/types';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
 
 type GymRow = Tables<'gym_preview'>;

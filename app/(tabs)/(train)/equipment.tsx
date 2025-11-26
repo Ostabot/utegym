@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
+import { useWorkoutWizard } from 'src/contexts/workout-wizard-context';
 import { supabase } from '@/lib/supabase';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
 
 type EqRow = { key: string; name: string; category: string };

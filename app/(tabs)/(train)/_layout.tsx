@@ -1,6 +1,6 @@
 // app/(tabs)/(train)/_layout.tsx
 import { Stack } from 'expo-router';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';

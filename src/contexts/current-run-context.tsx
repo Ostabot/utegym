@@ -1,6 +1,6 @@
 // src/contexts/current-run-context.tsx
 import React, { createContext, useContext, useMemo, useState, useCallback, useEffect } from 'react';
-import type { WorkoutRunState } from '@/types/workout';
+import type { WorkoutRunState } from 'src/types/workout';
 
 type Ctx = {
     run: WorkoutRunState | null;

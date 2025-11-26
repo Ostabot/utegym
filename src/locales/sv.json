@@ -100,7 +100,36 @@
   "auth": {
     "loggedIn": "Du är inloggad",
     "loginFailed": "Kunde inte logga in",
-    "missingCode": "Saknar auth code"
+    "missingCode": "Saknar auth code",
+    "apple": {
+      "buttonLabel": "Logga in med Apple",
+      "failed": {
+        "title": "Apple-inloggning misslyckades"
+      }
+    },
+    "google": {
+      "signIn": "Logga in med Google",
+      "failed": {
+        "title": "Google-inloggning misslyckades"
+      }
+    },
+    "magic": {
+      "title": "Magisk länk",
+      "placeholder": "din@email.com",
+      "inputLabel": "E-postadress för magisk länk",
+      "send": "Skicka länk",
+      "badEmail": {
+        "title": "Ogiltig e-post",
+        "body": "Ange en giltig adress."
+      },
+      "sent": {
+        "title": "Länk skickad",
+        "body": "Kolla din e-post och öppna länken på den här enheten."
+      },
+      "failed": {
+        "title": "Kunde inte skicka länk"
+      }
+    }
   },
   "home": {
     "title": "Utegym",
@@ -108,7 +137,8 @@
     "searchPlaceholder": "Sök utegym, stad eller adress",
     "cta": {
       "findNearby": "Tryck för att hitta utegym i din närhet",
-      "enableLocation": "Slå på platsinformation för att hitta nära"
+      "enableLocation": "Slå på platsinformation för att hitta nära",
+      "hint": "Visar utegym nära din position och flyttar kartan"
     },
     "locationKnown": "Plats: {{lat}}, {{lon}}",
     "locationUnknown": "Plats: okänd",
@@ -121,11 +151,26 @@
     "meta": {
       "distanceKmAway": "{{km}} km bort",
       "rating": "Betyg {{r}}"
+    },
+    "search": {
+      "accessibilityLabel": "Sök utegym, stad eller adress",
+      "accessibilityHint": "Skriv förslag och resultat visas nedan"
+    },
+    "myLocation": {
+      "label": "Centrera kartan till min plats",
+      "hint": "Kartans fokus flyttas till din aktuella position"
+    },
+    "a11y": {
+      "resultsCount": "{{count}} utegym hittade"
+    },
+    "header": {
+      "nearby": "Närmast dig",
+      "cluster": "Gym i valt område"
     }
   },
   "gym": {
-    "title": "Gym",
-    "loadError": "Kunde inte ladda gymmet.",
+    "title": "Utegym",
+    "loadError": "Kunde inte ladda utegymmet.",
     "placeholderCaption": "Riktig bild på utegymmet saknas",
     "unknown": "Valfritt utegym",
     "commune": "Kommun",
@@ -133,6 +178,7 @@
     "rating": "Betyg: {{r}} ★",
     "createWorkout": "Skapa träningspass",
     "uploadPhoto": "Ladda upp bild",
+    "descriptionTitle": "Beskrivning",
     "photos": {
       "title": "Bilder",
       "empty": "Inga uppladdade bilder ännu."
@@ -162,7 +208,7 @@
     "profile": "Profil"
   },
   "profile": {
-    "title": "Profil",
+    "title": "Konto",
     "aliasLabel": "Alias: {{alias}}",
     "pendingToSync": "Offline-sparade pass att synka: {{n}}",
     "actions": {
@@ -357,6 +403,33 @@
     "share": {
       "title": "Dela ditt pass",
       "message": "Kolla mitt träningspass på {{gym}}! {{link}}"
+    }
+  },
+  "onboarding": {
+    "title": "Välkommen!",
+    "subtitle": "Logga in för att spara pass, foton och få full funktionalitet.",
+    "guest": "Fortsätt som gäst",
+    "language": {
+      "title": "Språk",
+      "a11y": "Välj språk: {{label}}"
+    },
+    "legal": {
+      "prefix": "Genom att fortsätta godkänner du",
+      "and": "och",
+      "full": "Genom att fortsätta godkänner du användarvillkor och integritetspolicy."
+    }
+  },
+  "legal": {
+    "terms": "användarvillkor",
+    "privacy": "integritetspolicy"
+  },
+  "fav": {
+    "added": "Sparad som favorit",
+    "removed": "Borttagen från favoriter",
+    "error": "Kunde inte uppdatera favorit",
+    "a11y": {
+      "add": "Spara som favorit",
+      "remove": "Ta bort från favoriter"
     }
   }
 }

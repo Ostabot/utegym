@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
-import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
+import { useWorkoutWizard } from 'src/contexts/workout-wizard-context';
 import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 

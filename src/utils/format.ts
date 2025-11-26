@@ -1,5 +1,5 @@
 // src/utils/format.ts
-import i18n from '@/lib/i18n';
+import i18n from 'src/lib/i18n';
 
 export function formatDate(d: Date, opts?: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat(i18n.language, opts).format(d);

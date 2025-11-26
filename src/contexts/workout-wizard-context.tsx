@@ -8,14 +8,14 @@ import React, {
   type ReactNode,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEYS } from '@/lib/storage/keys';
+import { STORAGE_KEYS } from 'src/lib/storage/keys';
 import type {
   WizardExercise,
   WizardGym,
   WizardMethod,
   WorkoutPlan,
-} from '@/types/workout';
-import type { Focus, Intensity, DurationKey } from '@/lib/workout';
+} from 'src/types/workout';
+import type { Focus, Intensity, DurationKey } from 'src/lib/workout';
 
 // -------------------------------------------------------
 const STATE_VERSION = 1;

@@ -54,6 +54,7 @@ async function fetchGymsPaged(filter: GymFilter): Promise<GymPreview[]> {
   }
 
   return rows;
+
 }
 
 export function useGyms(filter: GymFilter) {
@@ -64,4 +65,5 @@ export function useGyms(filter: GymFilter) {
     queryFn: () => fetchGymsPaged(filter),
     staleTime: 30_000,
   });
+  
 }

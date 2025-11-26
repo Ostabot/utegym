@@ -1,13 +1,13 @@
 // app/(tabs)/(profile)/about-map-attributions.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Linking, ScrollView } from 'react-native';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import {
   loadLastMapAttributions,
   defaultMapAttributions,
   type MapAttributionSource,
 } from '@/lib/mapAttributions';
-import AccessiblePressable from '@/ui/AccessiblePressable';
+import AccessiblePressable from 'src/ui/AccessiblePressable';
 
 export default function AboutMapAttributions() {
   const theme = useAppTheme();

@@ -3,8 +3,8 @@ import React from 'react';
 import { Stack } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { WorkoutWizardProvider } from '@/contexts/workout-wizard-context';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { WorkoutWizardProvider } from 'src/contexts/workout-wizard-context';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
 
 export default function HomeStack() {

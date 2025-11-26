@@ -11,7 +11,7 @@ import {
     Platform,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useAppTheme } from 'src/ui/useAppTheme';
 
 // Static require så Metro bundlar den
 const raw = require('../../../assets/oss-licenses.json');

@@ -1,6 +1,6 @@
 // src/types/workout.ts
 import type { Tables } from '@/lib/types';
-import type { Focus, Intensity, DurationKey } from '@/lib/workout';
+import type { Focus, Intensity, DurationKey } from 'src/lib/workout';
 
 // — Gym som väljs i guiden (antingen från vy eller tabell)
 export type WizardGym = Tables<'gyms'> | Tables<'gym_preview'> | null;

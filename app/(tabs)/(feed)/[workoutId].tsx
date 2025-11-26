@@ -4,9 +4,9 @@ import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { supabase } from '@/lib/supabase';
-import WorkoutSummaryCard from '@/components/WorkoutSummaryCard';
-import { useAppTheme } from '@/ui/useAppTheme';
-import AccessiblePressable from '@/ui/AccessiblePressable';
+import WorkoutSummaryCard from 'src/components/WorkoutSummaryCard';
+import { useAppTheme } from 'src/ui/useAppTheme';
+import AccessiblePressable from 'src/ui/AccessiblePressable';
 import { useTranslation } from 'react-i18next';
 
 type PlanExercise = {

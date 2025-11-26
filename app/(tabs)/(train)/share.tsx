@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack } from 'expo-router';
-import { useWorkoutWizard } from '@/contexts/workout-wizard-context';
-import { useAppTheme } from '@/ui/useAppTheme';
+import { useWorkoutWizard } from 'src/contexts/workout-wizard-context';
+import { useAppTheme } from 'src/ui/useAppTheme';
 import { useTranslation } from 'react-i18next';
 
 const PLACEHOLDER = require('../../../assets/gym-placeholder.jpg');
